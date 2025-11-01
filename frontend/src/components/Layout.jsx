@@ -43,15 +43,18 @@ export default function Layout({ children }) {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
-      <header className="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-50">
+      <header className="bg-gradient-to-r from-blue-600 to-blue-700 shadow-lg sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             {/* Logo */}
             <div className="flex items-center">
-              <Package className="h-8 w-8 text-primary-600" />
-              <span className="ml-2 text-xl font-bold text-gray-900">
-                Baustelle System
-              </span>
+              <Package className="h-8 w-8 text-white" />
+              <div className="ml-2">
+                <span className="text-xl font-bold text-white">
+                  Baustelle System
+                </span>
+                <p className="text-xs text-blue-100">Material Management</p>
+              </div>
             </div>
 
             {/* Desktop Navigation */}
@@ -65,8 +68,8 @@ export default function Layout({ children }) {
                     to={link.to}
                     className={`flex items-center px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
                       isActive
-                        ? 'bg-primary-50 text-primary-700'
-                        : 'text-gray-700 hover:bg-gray-100'
+                        ? 'bg-white/20 text-white'
+                        : 'text-blue-100 hover:bg-white/10 hover:text-white'
                     }`}
                   >
                     <Icon className="h-4 w-4 mr-2" />
@@ -81,12 +84,12 @@ export default function Layout({ children }) {
               {/* Notifications */}
               <button
                 onClick={handleNotificationClick}
-                className="relative p-2 text-gray-600 hover:text-gray-900 rounded-lg hover:bg-gray-100"
+                className="relative p-2 text-white hover:bg-white/10 rounded-lg transition-colors"
                 title="Benachrichtigungen"
               >
-                <Bell className="h-5 w-5" />
+                <Bell className="h-6 w-6" />
                 {unreadCount > 0 && (
-                  <span className="absolute top-0 right-0 h-5 w-5 bg-red-500 text-white text-xs flex items-center justify-center rounded-full">
+                  <span className="absolute -top-1 -right-1 h-5 w-5 bg-red-500 text-white text-xs flex items-center justify-center rounded-full font-bold shadow-lg">
                     {unreadCount > 9 ? '9+' : unreadCount}
                   </span>
                 )}
@@ -95,12 +98,12 @@ export default function Layout({ children }) {
               {/* User Menu */}
               <div className="flex items-center space-x-3">
                 <div className="text-right hidden sm:block">
-                  <p className="text-sm font-medium text-gray-900">{profile?.full_name || 'User'}</p>
-                  <p className="text-xs text-gray-500 capitalize">{profile?.role}</p>
+                  <p className="text-sm font-medium text-white">{profile?.full_name || 'User'}</p>
+                  <p className="text-xs text-blue-200 capitalize">{profile?.role}</p>
                 </div>
                 <button
                   onClick={handleSignOut}
-                  className="p-2 text-gray-600 hover:text-red-600 rounded-lg hover:bg-gray-100"
+                  className="p-2 text-white hover:bg-white/10 rounded-lg transition-colors"
                   title="Abmelden"
                 >
                   <LogOut className="h-5 w-5" />
@@ -110,7 +113,7 @@ export default function Layout({ children }) {
               {/* Mobile menu button */}
               <button
                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                className="md:hidden p-2 text-gray-600 hover:text-gray-900 rounded-lg hover:bg-gray-100"
+                className="md:hidden p-2 text-white hover:bg-white/10 rounded-lg transition-colors"
               >
                 {mobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
               </button>
@@ -120,7 +123,7 @@ export default function Layout({ children }) {
 
         {/* Mobile Navigation */}
         {mobileMenuOpen && (
-          <div className="md:hidden border-t border-gray-200">
+          <div className="md:hidden border-t border-blue-500/30">
             <nav className="px-4 py-3 space-y-1">
               {links.map((link) => {
                 const Icon = link.icon
@@ -132,8 +135,8 @@ export default function Layout({ children }) {
                     onClick={() => setMobileMenuOpen(false)}
                     className={`flex items-center px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
                       isActive
-                        ? 'bg-primary-50 text-primary-700'
-                        : 'text-gray-700 hover:bg-gray-100'
+                        ? 'bg-white/20 text-white'
+                        : 'text-blue-100 hover:bg-white/10 hover:text-white'
                     }`}
                   >
                     <Icon className="h-4 w-4 mr-3" />

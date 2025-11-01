@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuthStore } from '../../store/authStore'
 import { api } from '../../lib/api'
-import { Plus, Trash2, ArrowLeft, CheckCircle } from 'lucide-react'
+import { Plus, Trash2, ArrowLeft } from 'lucide-react'
 
 export default function CreateRequest() {
   const navigate = useNavigate()
@@ -129,33 +129,29 @@ export default function CreateRequest() {
   if (loading) {
     return (
       <div className="flex justify-center items-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
       </div>
     )
   }
 
   return (
-    <div className="max-w-4xl mx-auto space-y-4">
-      <button onClick={() => navigate(-1)} className="mb-4 flex items-center px-4 py-2 bg-white rounded-xl shadow-md hover:shadow-lg transition-all text-gray-700 font-medium">
+    <div className="max-w-4xl mx-auto">
+      <button onClick={() => navigate(-1)} className="btn-secondary mb-6 flex items-center">
         <ArrowLeft className="h-4 w-4 mr-2" />
         Zurück
       </button>
 
-      <div className="bg-white rounded-2xl shadow-lg p-6 md:p-8">
-        <h1 className="text-3xl font-bold text-gray-800 mb-2 flex items-center gap-3">
-          <Plus className="h-8 w-8 text-blue-600" />
-          Neuer Antrag
-        </h1>
-        <p className="text-gray-500 mb-8">Füllen Sie das Formular aus, um eine neue Materialanfrage zu erstellen</p>
+      <div className="card">
+        <h1 className="text-2xl font-bold text-gray-900 mb-6">Neue Anfrage erstellen</h1>
 
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Baustelle Selection */}
           <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2">Baustelle *</label>
+            <label className="label">Baustelle *</label>
             <select
               value={formData.baustelle_id}
               onChange={(e) => setFormData({ ...formData, baustelle_id: e.target.value })}
-              className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-gray-50 font-medium"
+              className="input"
               required
             >
               <option value="">Baustelle auswählen</option>
@@ -168,40 +164,66 @@ export default function CreateRequest() {
           </div>
 
           {/* Priority and Date */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">Benötigt am</label>
+              <label className="label">Priorität</label>
+              <select
+                value={formData.priority}
+                onChange={(e) => setFormData({ ...formData, priority: e.target.value })}
+                className="input"
+              >
+                <option value="low">Niedrig</option>
+                <option value="normal">Normal</option>
+                <option value="high">Hoch</option>
+                <option value="urgent">Dringend</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="label">Benötigt am</label>
               <input
                 type="date"
                 value={formData.needed_date}
                 onChange={(e) => setFormData({ ...formData, needed_date: e.target.value })}
-                className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-gray-50 font-medium"
+                className="input"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">Lieferzeit</label>
+              <label className="label">Lieferzeit</label>
               <input
                 type="text"
                 value={formData.delivery_time}
                 onChange={(e) => setFormData({ ...formData, delivery_time: e.target.value })}
-                className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-gray-50 font-medium"
+                className="input"
                 placeholder="z.B. 8-12 Uhr"
               />
             </div>
           </div>
 
-          {/* Add Items Section */}
-          <div className="border-t-2 border-gray-100 pt-6">
-            <h3 className="text-lg font-bold text-gray-800 mb-4">Material / Maschinen hinzufügen</h3>
+          {/* Notes */}
+          <div>
+            <label className="label">Bemerkungen</label>
+            <textarea
+              value={formData.notes}
+              onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
+              className="input"
+              rows="3"
+              placeholder="Zusätzliche Hinweise..."
+            ></textarea>
+          </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-12 gap-3 items-end">
-              <div className="md:col-span-6">
-                <label className="block text-xs font-semibold text-gray-600 mb-1">Material / Maschine</label>
+          {/* Add Items Section */}
+          <div className="border-t pt-6">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">Material / Maschinen hinzufügen</h3>
+
+            <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-end">
+              <div className="md:col-span-5">
+                <label className="label">Material / Maschine</label>
                 <select
                   value={currentItem.item_id}
                   onChange={(e) => setCurrentItem({ ...currentItem, item_id: e.target.value })}
-                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-gray-50 text-sm font-medium"
+                  className="input"
                 >
                   <option value="">Auswählen...</option>
                   {items.map((item) => (
@@ -213,30 +235,30 @@ export default function CreateRequest() {
               </div>
 
               <div className="md:col-span-2">
-                <label className="block text-xs font-semibold text-gray-600 mb-1">Menge</label>
+                <label className="label">Menge</label>
                 <input
                   type="number"
                   step="0.01"
                   value={currentItem.quantity}
                   onChange={(e) => setCurrentItem({ ...currentItem, quantity: e.target.value })}
-                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-gray-50 text-sm font-medium"
+                  className="input"
                   placeholder="0"
                 />
               </div>
 
-              <div className="md:col-span-3">
-                <label className="block text-xs font-semibold text-gray-600 mb-1">Bemerkung</label>
+              <div className="md:col-span-4">
+                <label className="label">Bemerkung</label>
                 <input
                   type="text"
                   value={currentItem.notes}
                   onChange={(e) => setCurrentItem({ ...currentItem, notes: e.target.value })}
-                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-gray-50 text-sm font-medium"
+                  className="input"
                   placeholder="Optional..."
                 />
               </div>
 
               <div className="md:col-span-1">
-                <button type="button" onClick={handleAddItem} className="w-full bg-blue-600 hover:bg-blue-700 text-white p-3 rounded-xl shadow-md hover:shadow-lg transition-all flex items-center justify-center">
+                <button type="button" onClick={handleAddItem} className="btn-primary w-full">
                   <Plus className="h-5 w-5" />
                 </button>
               </div>
@@ -244,56 +266,41 @@ export default function CreateRequest() {
 
             {/* Items List */}
             {formData.items.length > 0 && (
-              <div className="mt-6">
-                <h4 className="font-semibold text-gray-800 mb-3">Hinzugefügte Artikel:</h4>
-                <div className="border-2 border-blue-200 rounded-xl p-4 bg-blue-50 space-y-3">
-                  {formData.items.map((item, index) => (
-                    <div key={index} className="flex items-center justify-between bg-white p-3 rounded-lg shadow-sm">
-                      <div className="flex-1">
-                        <p className="font-semibold text-gray-900">{item.item_name}</p>
-                        <p className="text-sm text-gray-600">
-                          Menge: <span className="font-bold text-blue-600">{item.quantity} {item.unit}</span>
-                          {item.notes && ` - ${item.notes}`}
-                        </p>
-                      </div>
-                      <button
-                        type="button"
-                        onClick={() => handleRemoveItem(index)}
-                        className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                      >
-                        <Trash2 className="h-5 w-5" />
-                      </button>
+              <div className="mt-6 space-y-2">
+                <h4 className="font-medium text-gray-900">Hinzugefügte Artikel:</h4>
+                {formData.items.map((item, index) => (
+                  <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                    <div className="flex-1">
+                      <p className="font-medium text-gray-900">{item.item_name}</p>
+                      <p className="text-sm text-gray-600">
+                        Menge: {item.quantity} {item.unit}
+                        {item.notes && ` - ${item.notes}`}
+                      </p>
                     </div>
-                  ))}
-                </div>
+                    <button
+                      type="button"
+                      onClick={() => handleRemoveItem(index)}
+                      className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                    >
+                      <Trash2 className="h-5 w-5" />
+                    </button>
+                  </div>
+                ))}
               </div>
             )}
           </div>
 
-          {/* Notes */}
-          <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2">Bemerkungen</label>
-            <textarea
-              value={formData.notes}
-              onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-              className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-gray-50 font-medium"
-              rows="3"
-              placeholder="Zusätzliche Hinweise..."
-            ></textarea>
-          </div>
-
           {/* Submit Buttons */}
-          <div className="flex justify-end space-x-4 pt-6 border-t-2 border-gray-100">
-            <button type="button" onClick={() => navigate(-1)} className="px-6 py-3 bg-gray-200 text-gray-900 font-semibold rounded-xl shadow-md hover:bg-gray-300 hover:shadow-lg transition-all">
+          <div className="flex justify-end space-x-4 pt-6 border-t">
+            <button type="button" onClick={() => navigate(-1)} className="btn-secondary">
               Abbrechen
             </button>
             <button
               type="submit"
               disabled={submitting || formData.items.length === 0}
-              className="px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white font-bold rounded-xl shadow-md hover:shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+              className="btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              <CheckCircle className="h-5 w-5" />
-              {submitting ? 'Wird erstellt...' : 'Antrag einreichen'}
+              {submitting ? 'Wird erstellt...' : 'Anfrage erstellen'}
             </button>
           </div>
         </form>
