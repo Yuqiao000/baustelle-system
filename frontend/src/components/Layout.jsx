@@ -50,7 +50,7 @@ export default function Layout({ children }) {
             <div className="flex items-center">
               <Package className="h-8 w-8 text-primary-600" />
               <span className="ml-2 text-xl font-bold text-gray-900">
-                GSW Material System
+                Baustelle System
               </span>
             </div>
 
