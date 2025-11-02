@@ -2,7 +2,8 @@ import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useAuthStore } from '../../store/authStore'
 import { api } from '../../lib/api'
-import { Filter, Search } from 'lucide-react'
+import { Search, Clock, CheckCircle } from 'lucide-react'
+import { format } from 'date-fns'
 
 export default function MyRequests() {
   const { user } = useAuthStore()
@@ -31,24 +32,44 @@ export default function MyRequests() {
     }
   }
 
+  const getStatusStyle = (status) => {
+    const styles = {
+      pending: 'bg-gradient-to-r from-yellow-50 to-orange-50 border-yellow-200',
+      confirmed: 'bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-200',
+      preparing: 'bg-gradient-to-r from-purple-50 to-pink-50 border-purple-200',
+      ready: 'bg-gradient-to-r from-indigo-50 to-blue-50 border-indigo-200',
+      shipped: 'bg-gradient-to-r from-cyan-50 to-teal-50 border-cyan-200',
+      completed: 'bg-gradient-to-r from-green-50 to-emerald-50 border-green-200',
+      cancelled: 'bg-gradient-to-r from-red-50 to-pink-50 border-red-200',
+    }
+    return styles[status] || 'bg-gray-50 border-gray-200'
+  }
+
   const getStatusBadge = (status) => {
     const badges = {
-      pending: 'badge-pending',
-      confirmed: 'badge-confirmed',
-      preparing: 'badge-preparing',
-      ready: 'badge-ready',
-      shipped: 'badge-shipped',
-      completed: 'badge-completed',
-      cancelled: 'badge-cancelled',
+      pending: 'bg-yellow-400 text-yellow-900',
+      confirmed: 'bg-blue-400 text-blue-900',
+      preparing: 'bg-purple-400 text-purple-900',
+      ready: 'bg-indigo-400 text-indigo-900',
+      shipped: 'bg-cyan-400 text-cyan-900',
+      completed: 'bg-green-400 text-green-900',
+      cancelled: 'bg-red-400 text-red-900',
     }
-    return badges[status] || 'badge'
+    return badges[status] || 'bg-gray-400 text-gray-900'
+  }
+
+  const getStatusIcon = (status) => {
+    if (status === 'completed') {
+      return <CheckCircle className="w-4 h-4" />
+    }
+    return <Clock className="w-4 h-4" />
   }
 
   const getStatusText = (status) => {
     const texts = {
       pending: 'Ausstehend',
       confirmed: 'Bestätigt',
-      preparing: 'In Vorbereitung',
+      preparing: 'Vorbereitung',
       ready: 'Bereit',
       shipped: 'Versandt',
       completed: 'Abgeschlossen',
@@ -64,22 +85,22 @@ export default function MyRequests() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold text-gray-900">Meine Anfragen</h1>
+        <h1 className="text-3xl font-bold text-gray-800">Meine Anträge</h1>
         <p className="mt-1 text-gray-600">Verwalten Sie Ihre Materialanfragen</p>
       </div>
 
       {/* Filters */}
-      <div className="card">
+      <div className="bg-white rounded-2xl shadow-md p-6">
         <div className="flex flex-col md:flex-row gap-4">
           <div className="flex-1">
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+              <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
               <input
                 type="text"
                 placeholder="Nach Anfragenummer suchen..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="input pl-10"
+                className="w-full pl-12 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-gray-50 font-medium"
               />
             </div>
           </div>
@@ -88,7 +109,7 @@ export default function MyRequests() {
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
-              className="input"
+              className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-gray-50 font-medium"
             >
               <option value="">Alle Status</option>
               <option value="pending">Ausstehend</option>
@@ -106,12 +127,12 @@ export default function MyRequests() {
       {/* Requests List */}
       {loading ? (
         <div className="flex justify-center items-center h-64">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
         </div>
       ) : filteredRequests.length === 0 ? (
-        <div className="card text-center py-12">
-          <p className="text-gray-600">Keine Anfragen gefunden</p>
-          <Link to="/worker/new-request" className="text-primary-600 hover:text-primary-700 mt-2 inline-block">
+        <div className="bg-white rounded-2xl shadow-md p-12 text-center">
+          <p className="text-gray-600 mb-4">Keine Anfragen gefunden</p>
+          <Link to="/worker/new-request" className="inline-block px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white font-bold rounded-xl shadow-md hover:shadow-lg transition-all">
             Neue Anfrage erstellen
           </Link>
         </div>
@@ -121,36 +142,39 @@ export default function MyRequests() {
             <Link
               key={request.id}
               to={`/worker/requests/${request.id}`}
-              className="card hover:shadow-md transition-shadow"
+              className={`block border-2 rounded-2xl p-5 shadow-md hover:shadow-lg transition-all ${getStatusStyle(request.status)}`}
             >
               <div className="flex flex-col md:flex-row md:items-center md:justify-between">
                 <div className="flex-1">
-                  <div className="flex items-center space-x-3 mb-2">
-                    <h3 className="text-lg font-semibold text-gray-900">{request.request_number}</h3>
-                    <span className={getStatusBadge(request.status)}>
-                      {getStatusText(request.status)}
+                  <div className="flex items-center gap-3 mb-3">
+                    <h3 className="text-base font-bold text-gray-800">{request.request_number}</h3>
+                    <span className={`text-xs px-3 py-1.5 rounded-full font-bold flex items-center gap-1 ${getStatusBadge(request.status)}`}>
+                      {getStatusIcon(request.status)}
+                      {getStatusText(request.status).toUpperCase()}
                     </span>
                     {request.priority === 'high' || request.priority === 'urgent' ? (
-                      <span className="badge bg-red-100 text-red-800">
-                        {request.priority === 'urgent' ? 'Dringend' : 'Hoch'}
+                      <span className="text-xs px-3 py-1.5 bg-red-400 text-red-900 rounded-full font-bold">
+                        {request.priority === 'urgent' ? '⚡ DRINGEND' : '🔥 HOCH'}
                       </span>
                     ) : null}
                   </div>
 
                   {request.notes && (
-                    <p className="text-sm text-gray-600 mb-2 line-clamp-2">{request.notes}</p>
+                    <p className="text-sm text-gray-700 mb-3 font-medium line-clamp-2">{request.notes}</p>
                   )}
 
-                  <div className="flex flex-wrap gap-4 text-sm text-gray-500">
-                    <span>Erstellt: {new Date(request.created_at).toLocaleDateString('de-DE')}</span>
+                  <div className="flex flex-wrap gap-4 text-sm text-gray-600">
+                    <span className="font-medium">📅 Erstellt: {format(new Date(request.created_at), 'dd.MM.yyyy')}</span>
                     {request.needed_date && (
-                      <span>Benötigt: {new Date(request.needed_date).toLocaleDateString('de-DE')}</span>
+                      <span className="font-medium">⏰ Benötigt: {format(new Date(request.needed_date), 'dd.MM.yyyy')}</span>
                     )}
                   </div>
                 </div>
 
-                <div className="mt-4 md:mt-0">
-                  <span className="text-primary-600 font-medium">Details →</span>
+                <div className="mt-4 md:mt-0 md:ml-4">
+                  <span className="inline-block px-4 py-2 bg-white text-blue-600 font-bold rounded-lg shadow-sm">
+                    Details →
+                  </span>
                 </div>
               </div>
             </Link>
