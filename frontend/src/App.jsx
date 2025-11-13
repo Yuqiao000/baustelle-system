@@ -13,6 +13,7 @@ import LagerDashboard from './pages/lager/LagerDashboard'
 import AllRequests from './pages/lager/AllRequests'
 import InventoryManagement from './pages/lager/InventoryManagement'
 import InventoryScan from './pages/lager/InventoryScan'
+import BarcodeGenerator from './pages/lager/BarcodeGenerator'
 import Statistics from './pages/lager/Statistics'
 import Layout from './components/Layout'
 
@@ -69,6 +70,7 @@ function App() {
         <Route path="/lager/requests/:id" element={<RequestDetails />} />
         <Route path="/lager/inventory" element={<InventoryManagement />} />
         <Route path="/lager/scan" element={<InventoryScan />} />
+        <Route path="/lager/barcode-generator" element={<BarcodeGenerator />} />
         <Route path="/lager/statistics" element={<Statistics />} />
 
         {/* 404 */}

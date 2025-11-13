@@ -81,7 +81,18 @@ const lagerLinks = [
 ]
 ```
 
-### 第四步：提交到Git并部署
+### 第四步：为物料生成条码
+
+在Supabase SQL Editor中运行：
+
+```bash
+# 打开文件: /Users/yuqiao/baustelle-system/database/add_barcodes.sql
+# 复制所有内容到Supabase SQL Editor并执行
+```
+
+这会为所有没有条码的物料自动生成条码（格式：BAR-xxxxxxxx-xxx）
+
+### 第五步：提交到Git并部署
 
 ```bash
 cd /Users/yuqiao/baustelle-system
@@ -135,27 +146,29 @@ git push origin main
 
 ## 🏷️ 条码管理
 
+### 系统内置QR码生成器 ⭐ 推荐
+
+1. 登录系统，进入仓库端
+2. 点击导航栏的 "QR-Codes"
+3. 系统会自动为所有物料生成QR码
+4. 可以选择：
+   - **下载**：保存QR码图片到电脑
+   - **打印**：直接打印QR码标签
+5. 将打印的QR码贴在物料上
+
 ### 如果物料已有条码
 
 直接使用现有的条码/二维码，扫描即可。
 
-### 如果物料没有条码
+### 其他方案
 
-**方案1：在线生成并打印**
-
-```javascript
-// 系统已安装 qrcode 库
-// 可以在系统中为每个物料生成二维码
-// 打印在标签纸上贴在物料上
-```
-
-**方案2：购买条码打印机**
+**方案1：购买条码打印机**
 
 - 热敏打印机 (~€100-200)
 - 标签纸 (~€20/1000张)
 - 可以批量打印
 
-**方案3：使用在线服务**
+**方案2：使用在线服务**
 
 - 访问 https://www.labelary.com/
 - 生成条码图片
@@ -230,6 +243,17 @@ GET    /api/wms/transactions       # 获取记录
 
 POST   /api/wms/purchase-requests  # 创建采购申请
 GET    /api/wms/purchase-requests  # 获取采购申请
+```
+
+## 📱 前端页面
+
+### WMS相关页面
+
+```
+/lager/scan              # 条码扫描（出入库操作）
+/lager/barcode-generator # QR码生成器（下载和打印）
+/lager/inventory         # 库存管理
+/lager/statistics        # 统计报表
 ```
 
 ## 🎯 下一步开发（可选）
