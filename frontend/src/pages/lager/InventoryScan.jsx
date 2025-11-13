@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useAuthStore } from '../../store/authStore'
-import NativeBarcodeScanner from '../../components/NativeBarcodeScanner'
+import BarcodeScanner from '../../components/BarcodeScanner'
 import { Camera, Package, ArrowDownCircle, ArrowUpCircle, AlertCircle } from 'lucide-react'
 
 export default function InventoryScan() {
@@ -275,7 +275,7 @@ export default function InventoryScan() {
 
       {/* Scanner Modal */}
       {showScanner && (
-        <NativeBarcodeScanner
+        <BarcodeScanner
           onScan={handleScan}
           onClose={() => setShowScanner(false)}
         />
