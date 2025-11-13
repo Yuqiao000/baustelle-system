@@ -6,7 +6,7 @@ from fastapi import APIRouter, HTTPException, Depends
 from typing import List, Optional
 from pydantic import BaseModel
 from datetime import datetime
-from ..database import get_db
+from ..database import get_supabase
 
 router = APIRouter(prefix="/api/wms", tags=["wms"])
 
@@ -97,7 +97,7 @@ class PurchaseRequest(BaseModel):
 @router.get("/locations", response_model=List[StorageLocation])
 async def get_storage_locations(
     is_active: Optional[bool] = None,
-    db=Depends(get_db)
+    db=Depends(get_supabase)
 ):
     """获取所有库位"""
     query = db.table("storage_locations").select("*")
@@ -108,7 +108,7 @@ async def get_storage_locations(
 
 
 @router.post("/locations", response_model=StorageLocation)
-async def create_storage_location(location: StorageLocationCreate, db=Depends(get_db)):
+async def create_storage_location(location: StorageLocationCreate, db=Depends(get_supabase)):
     """创建新库位"""
     result = db.table("storage_locations").insert(location.dict()).execute()
     if not result.data:
@@ -119,7 +119,7 @@ async def create_storage_location(location: StorageLocationCreate, db=Depends(ge
 # ============ 条码扫描 API ============
 
 @router.get("/barcode/{barcode}", response_model=BarcodeSearchResponse)
-async def search_by_barcode(barcode: str, db=Depends(get_db)):
+async def search_by_barcode(barcode: str, db=Depends(get_supabase)):
     """通过条码搜索物料"""
     # 查找物料
     item_result = db.table("items").select("*").eq("barcode", barcode).execute()
@@ -159,7 +159,7 @@ async def search_by_barcode(barcode: str, db=Depends(get_db)):
 async def get_inventory(
     item_id: Optional[str] = None,
     location_id: Optional[str] = None,
-    db=Depends(get_db)
+    db=Depends(get_supabase)
 ):
     """获取库存信息"""
     query = db.table("inventory").select("*, items(*), storage_locations(*)")
@@ -174,14 +174,14 @@ async def get_inventory(
 
 
 @router.get("/inventory/summary")
-async def get_inventory_summary(db=Depends(get_db)):
+async def get_inventory_summary(db=Depends(get_supabase)):
     """获取库存摘要（使用视图）"""
     result = db.table("inventory_summary").select("*").execute()
     return result.data
 
 
 @router.get("/inventory/low-stock")
-async def get_low_stock_items(db=Depends(get_db)):
+async def get_low_stock_items(db=Depends(get_supabase)):
     """获取低库存物料"""
     result = db.table("low_stock_items").select("*").execute()
     return result.data
@@ -190,7 +190,7 @@ async def get_low_stock_items(db=Depends(get_db)):
 # ============ 出入库操作 API ============
 
 @router.post("/transactions", response_model=InventoryTransaction)
-async def create_transaction(transaction: InventoryTransactionCreate, db=Depends(get_db)):
+async def create_transaction(transaction: InventoryTransactionCreate, db=Depends(get_supabase)):
     """创建出入库记录"""
     # 1. 获取当前库存
     inventory_result = (
@@ -245,7 +245,7 @@ async def get_transactions(
     item_id: Optional[str] = None,
     operator_id: Optional[str] = None,
     limit: int = 50,
-    db=Depends(get_db)
+    db=Depends(get_supabase)
 ):
     """获取出入库记录"""
     query = db.table("inventory_transactions").select("*").order("created_at", desc=True).limit(limit)
@@ -262,7 +262,7 @@ async def get_transactions(
 # ============ 采购申请 API ============
 
 @router.post("/purchase-requests", response_model=PurchaseRequest)
-async def create_purchase_request(request: PurchaseRequestCreate, db=Depends(get_db)):
+async def create_purchase_request(request: PurchaseRequestCreate, db=Depends(get_supabase)):
     """创建采购申请"""
     # 生成申请编号
     number_result = db.rpc("generate_purchase_request_number").execute()
@@ -283,7 +283,7 @@ async def create_purchase_request(request: PurchaseRequestCreate, db=Depends(get
 @router.get("/purchase-requests", response_model=List[PurchaseRequest])
 async def get_purchase_requests(
     status: Optional[str] = None,
-    db=Depends(get_db)
+    db=Depends(get_supabase)
 ):
     """获取采购申请列表"""
     query = db.table("purchase_requests").select("*").order("created_at", desc=True)
@@ -299,7 +299,7 @@ async def get_purchase_requests(
 async def update_purchase_request_status(
     request_id: str,
     status: str,
-    db=Depends(get_db)
+    db=Depends(get_supabase)
 ):
     """更新采购申请状态"""
     valid_statuses = ["pending", "approved", "ordered", "received", "cancelled"]
@@ -319,7 +319,7 @@ async def update_purchase_request_status(
 @router.post("/inventory/bulk-init")
 async def bulk_init_inventory(
     items: List[dict],  # [{ item_id, location_id, quantity, operator_id }]
-    db=Depends(get_db)
+    db=Depends(get_supabase)
 ):
     """批量初始化库存（首次盘点）"""
     results = []
