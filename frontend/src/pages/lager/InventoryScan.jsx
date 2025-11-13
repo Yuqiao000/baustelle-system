@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useAuthStore } from '../../store/authStore'
 import BarcodeScanner from '../../components/BarcodeScanner'
 import { Camera, Package, ArrowDownCircle, ArrowUpCircle, AlertCircle } from 'lucide-react'
@@ -16,7 +16,7 @@ export default function InventoryScan() {
   const [loading, setLoading] = useState(false)
 
   // 加载所有库位
-  useState(() => {
+  useEffect(() => {
     loadLocations()
   }, [])
 
