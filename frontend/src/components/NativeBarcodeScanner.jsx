@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import jsQR from 'jsqr'
-import { Camera, X, AlertCircle } from 'lucide-react'
+import { Camera, X, AlertCircle, Type } from 'lucide-react'
 
 export default function NativeBarcodeScanner({ onScan, onClose }) {
   const videoRef = useRef(null)
@@ -8,9 +8,28 @@ export default function NativeBarcodeScanner({ onScan, onClose }) {
   const [manualCode, setManualCode] = useState('')
   const [error, setError] = useState(null)
   const [isScanning, setIsScanning] = useState(false)
+  const [cameraSupported, setCameraSupported] = useState(true)
   const animationFrameRef = useRef(null)
 
   useEffect(() => {
+    // 检查浏览器是否支持摄像头
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      setCameraSupported(false)
+      setError('Ihr Browser unterstützt keinen Kamerazugriff. Bitte verwenden Sie die manuelle Eingabe.')
+      return
+    }
+
+    // 检查是否是 HTTPS 或 localhost
+    const isSecure = window.location.protocol === 'https:' ||
+                     window.location.hostname === 'localhost' ||
+                     window.location.hostname === '127.0.0.1'
+
+    if (!isSecure) {
+      setCameraSupported(false)
+      setError('Kamerazugriff ist nur über HTTPS verfügbar. Bitte verwenden Sie die manuelle Eingabe oder öffnen Sie die App über die Produktions-URL.')
+      return
+    }
+
     startCamera()
     return () => {
       stopCamera()
@@ -20,28 +39,54 @@ export default function NativeBarcodeScanner({ onScan, onClose }) {
   const startCamera = async () => {
     try {
       setError(null)
-      const stream = await navigator.mediaDevices.getUserMedia({
-        video: {
-          facingMode: 'environment', // 使用后置摄像头
-          width: { ideal: 1280 },
-          height: { ideal: 720 }
-        }
-      })
+
+      // 首先尝试后置摄像头
+      let stream
+      try {
+        stream = await navigator.mediaDevices.getUserMedia({
+          video: {
+            facingMode: { ideal: 'environment' },
+            width: { ideal: 1280 },
+            height: { ideal: 720 }
+          }
+        })
+      } catch (err) {
+        // 如果后置摄像头失败，尝试任何可用摄像头
+        console.log('Rear camera failed, trying any camera:', err)
+        stream = await navigator.mediaDevices.getUserMedia({
+          video: {
+            width: { ideal: 1280 },
+            height: { ideal: 720 }
+          }
+        })
+      }
 
       if (videoRef.current) {
         videoRef.current.srcObject = stream
-        videoRef.current.setAttribute('playsinline', true) // iOS需要
-        videoRef.current.play()
+        videoRef.current.setAttribute('playsinline', true)
+        videoRef.current.setAttribute('autoplay', true)
+        videoRef.current.setAttribute('muted', true)
+
+        // 等待视频准备好
+        await videoRef.current.play()
         setIsScanning(true)
         requestAnimationFrame(tick)
       }
     } catch (err) {
       console.error('Camera error:', err)
-      setError(
-        err.name === 'NotAllowedError'
-          ? 'Kamerazugriff verweigert. Bitte erlauben Sie den Kamerazugriff in den Browsereinstellungen.'
-          : 'Kamera konnte nicht gestartet werden. Bitte verwenden Sie die manuelle Eingabe.'
-      )
+      setCameraSupported(false)
+
+      let errorMessage = 'Kamera konnte nicht gestartet werden. Bitte verwenden Sie die manuelle Eingabe.'
+
+      if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
+        errorMessage = 'Kamerazugriff verweigert. Bitte erlauben Sie den Kamerazugriff in den Browsereinstellungen und laden Sie die Seite neu.'
+      } else if (err.name === 'NotFoundError' || err.name === 'DevicesNotFoundError') {
+        errorMessage = 'Keine Kamera gefunden. Bitte verwenden Sie die manuelle Eingabe.'
+      } else if (err.name === 'NotReadableError' || err.name === 'TrackStartError') {
+        errorMessage = 'Kamera wird bereits von einer anderen Anwendung verwendet. Bitte schließen Sie andere Apps und versuchen Sie es erneut.'
+      }
+
+      setError(errorMessage)
     }
   }
 
@@ -65,19 +110,21 @@ export default function NativeBarcodeScanner({ onScan, onClose }) {
       canvas.height = video.videoHeight
       canvas.width = video.videoWidth
 
-      const ctx = canvas.getContext('2d')
-      ctx.drawImage(video, 0, 0, canvas.width, canvas.height)
+      if (canvas.width > 0 && canvas.height > 0) {
+        const ctx = canvas.getContext('2d')
+        ctx.drawImage(video, 0, 0, canvas.width, canvas.height)
 
-      const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height)
-      const code = jsQR(imageData.data, imageData.width, imageData.height, {
-        inversionAttempts: 'dontInvert',
-      })
+        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height)
+        const code = jsQR(imageData.data, imageData.width, imageData.height, {
+          inversionAttempts: 'dontInvert',
+        })
 
-      if (code) {
-        setIsScanning(false)
-        stopCamera()
-        onScan(code.data)
-        return
+        if (code) {
+          setIsScanning(false)
+          stopCamera()
+          onScan(code.data)
+          return
+        }
       }
     }
 
@@ -87,6 +134,7 @@ export default function NativeBarcodeScanner({ onScan, onClose }) {
   const handleManualSubmit = (e) => {
     e.preventDefault()
     if (manualCode.trim()) {
+      stopCamera()
       onScan(manualCode.trim())
       setManualCode('')
     }
@@ -102,7 +150,10 @@ export default function NativeBarcodeScanner({ onScan, onClose }) {
             <h2 className="text-xl font-bold text-gray-800">QR-Code scannen</h2>
           </div>
           <button
-            onClick={onClose}
+            onClick={() => {
+              stopCamera()
+              onClose()
+            }}
             className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
           >
             <X className="h-5 w-5 text-gray-600" />
@@ -112,36 +163,39 @@ export default function NativeBarcodeScanner({ onScan, onClose }) {
         {/* 扫描区域 */}
         <div className="p-6">
           {/* 视频预览 */}
-          <div className="relative mb-6 bg-black rounded-xl overflow-hidden" style={{ aspectRatio: '4/3' }}>
-            <video
-              ref={videoRef}
-              className="w-full h-full object-cover"
-              playsInline
-              muted
-            />
-            <canvas ref={canvasRef} className="hidden" />
+          {cameraSupported && (
+            <div className="relative mb-6 bg-black rounded-xl overflow-hidden" style={{ aspectRatio: '4/3' }}>
+              <video
+                ref={videoRef}
+                className="w-full h-full object-cover"
+                playsInline
+                autoPlay
+                muted
+              />
+              <canvas ref={canvasRef} className="hidden" />
 
-            {/* 扫描框 */}
-            {isScanning && (
-              <div className="absolute inset-0 flex items-center justify-center">
-                <div className="border-4 border-green-500 rounded-lg" style={{ width: '250px', height: '250px' }}>
-                  <div className="absolute top-0 left-0 w-8 h-8 border-t-4 border-l-4 border-green-400"></div>
-                  <div className="absolute top-0 right-0 w-8 h-8 border-t-4 border-r-4 border-green-400"></div>
-                  <div className="absolute bottom-0 left-0 w-8 h-8 border-b-4 border-l-4 border-green-400"></div>
-                  <div className="absolute bottom-0 right-0 w-8 h-8 border-b-4 border-r-4 border-green-400"></div>
+              {/* 扫描框 */}
+              {isScanning && (
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <div className="relative border-4 border-green-500 rounded-lg" style={{ width: '250px', height: '250px' }}>
+                    <div className="absolute -top-1 -left-1 w-8 h-8 border-t-4 border-l-4 border-green-400"></div>
+                    <div className="absolute -top-1 -right-1 w-8 h-8 border-t-4 border-r-4 border-green-400"></div>
+                    <div className="absolute -bottom-1 -left-1 w-8 h-8 border-b-4 border-l-4 border-green-400"></div>
+                    <div className="absolute -bottom-1 -right-1 w-8 h-8 border-b-4 border-r-4 border-green-400"></div>
+                  </div>
                 </div>
-              </div>
-            )}
+              )}
 
-            {/* 扫描提示 */}
-            {isScanning && (
-              <div className="absolute bottom-4 left-0 right-0 text-center">
-                <p className="text-white text-sm bg-black/50 inline-block px-4 py-2 rounded-full">
-                  Halten Sie den QR-Code in den Rahmen
-                </p>
-              </div>
-            )}
-          </div>
+              {/* 扫描提示 */}
+              {isScanning && (
+                <div className="absolute bottom-4 left-0 right-0 text-center">
+                  <p className="text-white text-sm bg-black/50 inline-block px-4 py-2 rounded-full">
+                    Halten Sie den QR-Code in den Rahmen
+                  </p>
+                </div>
+              )}
+            </div>
+          )}
 
           {/* 错误提示 */}
           {error && (
@@ -152,21 +206,26 @@ export default function NativeBarcodeScanner({ onScan, onClose }) {
           )}
 
           {/* 手动输入 */}
-          <div className="pt-6 border-t-2 border-gray-100">
-            <p className="text-sm font-semibold text-gray-700 mb-3">
-              Oder manuell eingeben:
-            </p>
+          <div className={cameraSupported ? "pt-6 border-t-2 border-gray-100" : ""}>
+            <div className="flex items-center gap-2 mb-3">
+              <Type className="h-5 w-5 text-gray-600" />
+              <p className="text-sm font-semibold text-gray-700">
+                Manuelle Eingabe:
+              </p>
+            </div>
             <form onSubmit={handleManualSubmit} className="flex gap-2">
               <input
                 type="text"
                 value={manualCode}
                 onChange={(e) => setManualCode(e.target.value)}
                 placeholder="Barcode-Nummer eingeben..."
+                autoFocus={!cameraSupported}
                 className="flex-1 px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-gray-50 font-medium"
               />
               <button
                 type="submit"
-                className="px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white font-bold rounded-xl shadow-md hover:shadow-lg transition-all"
+                disabled={!manualCode.trim()}
+                className="px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white font-bold rounded-xl shadow-md hover:shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 Suchen
               </button>
@@ -176,8 +235,9 @@ export default function NativeBarcodeScanner({ onScan, onClose }) {
           {/* 提示信息 */}
           <div className="mt-6 p-4 bg-blue-50 rounded-xl border-2 border-blue-200">
             <p className="text-sm text-blue-800 font-medium">
-              💡 Tipp: Halten Sie den QR-Code gerade vor die Kamera und stellen Sie sicher,
-              dass er gut beleuchtet ist.
+              💡 Tipp: {cameraSupported
+                ? 'Halten Sie den QR-Code gerade vor die Kamera und stellen Sie sicher, dass er gut beleuchtet ist.'
+                : 'Geben Sie die Barcode-Nummer manuell ein, die auf dem Etikett steht.'}
             </p>
           </div>
         </div>
