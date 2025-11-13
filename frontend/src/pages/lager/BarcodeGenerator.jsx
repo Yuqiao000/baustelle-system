@@ -166,9 +166,13 @@ export default function BarcodeGenerator() {
               </h3>
 
               <div className="w-full space-y-2 mb-4">
-                <div className="text-sm text-gray-600 bg-gray-50 rounded-lg p-2">
+                <div className={`text-sm rounded-lg p-2 ${item.barcode ? 'text-gray-600 bg-gray-50' : 'text-orange-600 bg-orange-50'}`}>
                   <span className="font-semibold">Barcode:</span>{' '}
-                  <span className="font-mono">{item.barcode || 'Nicht verfügbar'}</span>
+                  {item.barcode ? (
+                    <span className="font-mono text-xs break-all">{item.barcode}</span>
+                  ) : (
+                    <span className="font-medium">Nicht verfügbar - Bitte SQL ausführen</span>
+                  )}
                 </div>
                 <div className="text-sm text-gray-600 bg-gray-50 rounded-lg p-2">
                   <span className="font-semibold">Kategorie:</span> {item.category}

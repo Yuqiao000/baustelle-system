@@ -99,6 +99,9 @@ class ItemBase(BaseModel):
     min_stock_level: Decimal = Decimal("0")
     image_url: Optional[str] = None
     is_active: bool = True
+    barcode: Optional[str] = None
+    current_stock: Optional[Decimal] = None
+    min_stock: Optional[Decimal] = None
 
 
 class ItemCreate(ItemBase):
