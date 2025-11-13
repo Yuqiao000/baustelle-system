@@ -13,7 +13,7 @@ export default function BarcodeGenerator() {
 
   const loadItems = async () => {
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/items`)
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/items?is_active=true`)
       const data = await response.json()
       setItems(data)
 
