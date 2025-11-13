@@ -1,7 +1,7 @@
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { useAuthStore } from '../store/authStore'
 import { useNotificationStore } from '../store/notificationStore'
-import { Home, Package, FileText, BarChart3, Bell, LogOut, Menu, X } from 'lucide-react'
+import { Home, Package, FileText, BarChart3, Bell, LogOut, Menu, X, Camera } from 'lucide-react'
 import { useState } from 'react'
 
 export default function Layout({ children }) {
@@ -24,6 +24,7 @@ export default function Layout({ children }) {
     { to: '/lager', icon: Home, label: 'Dashboard' },
     { to: '/lager/requests', icon: FileText, label: 'Alle Anfragen' },
     { to: '/lager/inventory', icon: Package, label: 'Lagerbestand' },
+    { to: '/lager/scan', icon: Camera, label: 'Scannen' },
     { to: '/lager/statistics', icon: BarChart3, label: 'Statistiken' },
   ]
 

@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.config import settings
-from app.routers import auth, baustellen, items, requests, notifications, statistics
+from app.routers import auth, baustellen, items, requests, notifications, statistics, wms
 
 app = FastAPI(
     title="Baustelle Material Management System",
@@ -25,6 +25,7 @@ app.include_router(items.router)
 app.include_router(requests.router)
 app.include_router(notifications.router)
 app.include_router(statistics.router)
+app.include_router(wms.router)
 
 
 @app.get("/")
