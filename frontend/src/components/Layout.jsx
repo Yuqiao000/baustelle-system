@@ -32,9 +32,20 @@ export default function Layout({ children }) {
   const links = isWorker ? workerLinks : lagerLinks
 
   const handleSignOut = async () => {
-    await signOut()
-    navigate('/login')
-    window.location.reload()
+    try {
+      const result = await signOut()
+      if (result?.success !== false) {
+        // 即使没有返回success，只要没有错误就继续
+        navigate('/login')
+        window.location.reload()
+      } else {
+        console.error('Sign out failed:', result?.error)
+        alert('Abmeldung fehlgeschlagen. Bitte versuchen Sie es erneut.')
+      }
+    } catch (error) {
+      console.error('Sign out error:', error)
+      alert('Abmeldung fehlgeschlagen. Bitte versuchen Sie es erneut.')
+    }
   }
 
   const handleNotificationClick = () => {
