@@ -1,15 +1,16 @@
 import { useEffect, useRef, useState } from 'react'
-import jsQR from 'jsqr'
 import { Camera, X, AlertCircle, Type } from 'lucide-react'
 
 export default function NativeBarcodeScanner({ onScan, onClose }) {
   const videoRef = useRef(null)
   const canvasRef = useRef(null)
+  const workerRef = useRef(null)
   const [manualCode, setManualCode] = useState('')
   const [error, setError] = useState(null)
   const [isScanning, setIsScanning] = useState(false)
   const [cameraSupported, setCameraSupported] = useState(true)
   const animationFrameRef = useRef(null)
+  const isProcessingRef = useRef(false)
 
   useEffect(() => {
     // 检查浏览器是否支持摄像头
@@ -30,11 +31,47 @@ export default function NativeBarcodeScanner({ onScan, onClose }) {
       return
     }
 
+    // 初始化 Web Worker
+    initWorker()
     startCamera()
+
     return () => {
       stopCamera()
+      if (workerRef.current) {
+        workerRef.current.terminate()
+      }
     }
   }, [])
+
+  const initWorker = () => {
+    try {
+      // 创建 Web Worker
+      workerRef.current = new Worker(
+        new URL('../workers/qrWorker.js', import.meta.url),
+        { type: 'module' }
+      )
+
+      // 监听 Worker 消息
+      workerRef.current.onmessage = (e) => {
+        isProcessingRef.current = false
+
+        if (e.data.success && e.data.data) {
+          setIsScanning(false)
+          stopCamera()
+          onScan(e.data.data)
+        }
+      }
+
+      workerRef.current.onerror = (err) => {
+        console.error('Worker error:', err)
+        isProcessingRef.current = false
+      }
+    } catch (err) {
+      console.error('Worker initialization failed:', err)
+      // Worker 失败时回退到主线程处理
+      workerRef.current = null
+    }
+  }
 
   const startCamera = async () => {
     try {
@@ -110,20 +147,20 @@ export default function NativeBarcodeScanner({ onScan, onClose }) {
       canvas.height = video.videoHeight
       canvas.width = video.videoWidth
 
-      if (canvas.width > 0 && canvas.height > 0) {
+      if (canvas.width > 0 && canvas.height > 0 && !isProcessingRef.current) {
         const ctx = canvas.getContext('2d')
         ctx.drawImage(video, 0, 0, canvas.width, canvas.height)
 
         const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height)
-        const code = jsQR(imageData.data, imageData.width, imageData.height, {
-          inversionAttempts: 'dontInvert',
-        })
 
-        if (code) {
-          setIsScanning(false)
-          stopCamera()
-          onScan(code.data)
-          return
+        // 使用 Web Worker 处理解码
+        if (workerRef.current) {
+          isProcessingRef.current = true
+          workerRef.current.postMessage({
+            imageData: imageData.data,
+            width: imageData.width,
+            height: imageData.height
+          })
         }
       }
     }
