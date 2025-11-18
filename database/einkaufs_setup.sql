@@ -11,7 +11,10 @@ CREATE TABLE IF NOT EXISTS suppliers (
   email TEXT,
   phone TEXT,
   address TEXT,
-  rating DECIMAL(2,1) DEFAULT 0, -- 评分 0-5
+  city TEXT,
+  postal_code TEXT,
+  country TEXT DEFAULT 'Deutschland',
+  rating INTEGER DEFAULT 0 CHECK (rating >= 0 AND rating <= 5), -- 评分 0-5
   notes TEXT,
   is_active BOOLEAN DEFAULT true,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc', NOW()),
@@ -40,10 +43,10 @@ CREATE TABLE IF NOT EXISTS purchase_orders (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   order_number TEXT UNIQUE NOT NULL, -- PO-20250114-001
   supplier_id UUID REFERENCES suppliers(id),
-  purchaser_id UUID REFERENCES profiles(id), -- 采购员
+  created_by UUID REFERENCES profiles(id), -- 创建人
   status TEXT NOT NULL DEFAULT 'draft', -- draft, ordered, shipping, delivered, cancelled
   total_amount DECIMAL(10,2) DEFAULT 0,
-  order_date TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc', NOW()),
+  ordered_at TIMESTAMP WITH TIME ZONE,
   expected_delivery_date DATE,
   actual_delivery_date DATE,
   notes TEXT,
@@ -56,10 +59,12 @@ CREATE TABLE IF NOT EXISTS purchase_orders (
 -- ====================================
 CREATE TABLE IF NOT EXISTS purchase_order_items (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  purchase_order_id UUID REFERENCES purchase_orders(id) ON DELETE CASCADE,
+  po_id UUID REFERENCES purchase_orders(id) ON DELETE CASCADE,
   item_id UUID REFERENCES items(id),
   quantity DECIMAL(10,2) NOT NULL,
+  unit TEXT NOT NULL,
   unit_price DECIMAL(10,2) NOT NULL,
+  total_price DECIMAL(10,2) NOT NULL,
   received_quantity DECIMAL(10,2) DEFAULT 0, -- 已收货数量
   notes TEXT,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc', NOW())
@@ -72,13 +77,12 @@ CREATE TABLE IF NOT EXISTS purchase_order_items (
 CREATE TABLE IF NOT EXISTS purchase_requests (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   item_id UUID REFERENCES items(id),
-  requested_quantity DECIMAL(10,2) NOT NULL,
+  quantity_needed DECIMAL(10,2) NOT NULL,
   priority TEXT DEFAULT 'normal', -- low, normal, high, urgent
   reason TEXT, -- 请求原因：low_stock, worker_request, project_need
-  status TEXT DEFAULT 'pending', -- pending, approved, rejected, ordered
-  requester_id UUID REFERENCES profiles(id),
-  approver_id UUID REFERENCES profiles(id),
-  purchase_order_id UUID REFERENCES purchase_orders(id), -- 关联的采购订单
+  status TEXT DEFAULT 'pending', -- pending, approved, rejected, converted
+  created_by UUID REFERENCES profiles(id),
+  po_id UUID REFERENCES purchase_orders(id), -- 关联的采购订单
   notes TEXT,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc', NOW()),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc', NOW())
@@ -89,11 +93,13 @@ CREATE TABLE IF NOT EXISTS purchase_requests (
 -- ====================================
 CREATE TABLE IF NOT EXISTS delivery_records (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  purchase_order_id UUID REFERENCES purchase_orders(id),
-  receiver_id UUID REFERENCES profiles(id), -- 收货人（Lager）
-  delivery_date TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc', NOW()),
-  quality_check_status TEXT DEFAULT 'pending', -- pending, passed, failed
-  quality_notes TEXT,
+  po_id UUID REFERENCES purchase_orders(id),
+  item_id UUID REFERENCES items(id),
+  quantity_received DECIMAL(10,2) NOT NULL,
+  quality_check_passed BOOLEAN DEFAULT true,
+  received_by UUID REFERENCES profiles(id), -- 收货人（Lager）
+  received_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc', NOW()),
+  notes TEXT,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc', NOW())
 );
 
@@ -102,7 +108,7 @@ CREATE TABLE IF NOT EXISTS delivery_records (
 -- ====================================
 CREATE INDEX IF NOT EXISTS idx_purchase_orders_status ON purchase_orders(status);
 CREATE INDEX IF NOT EXISTS idx_purchase_orders_supplier ON purchase_orders(supplier_id);
-CREATE INDEX IF NOT EXISTS idx_purchase_orders_date ON purchase_orders(order_date);
+CREATE INDEX IF NOT EXISTS idx_purchase_orders_created_at ON purchase_orders(created_at);
 CREATE INDEX IF NOT EXISTS idx_purchase_requests_status ON purchase_requests(status);
 CREATE INDEX IF NOT EXISTS idx_purchase_requests_item ON purchase_requests(item_id);
 CREATE INDEX IF NOT EXISTS idx_supplier_items_supplier ON supplier_items(supplier_id);
@@ -154,7 +160,9 @@ $$ LANGUAGE plpgsql;
 -- ====================================
 -- 视图：低库存物料
 -- ====================================
-CREATE OR REPLACE VIEW low_stock_items AS
+DROP VIEW IF EXISTS low_stock_items;
+
+CREATE VIEW low_stock_items AS
 SELECT
   i.id,
   i.name,
@@ -178,38 +186,46 @@ ORDER BY (i.current_stock / NULLIF(i.min_stock, 0)) ASC;
 -- ====================================
 -- 视图：采购订单详情
 -- ====================================
-CREATE OR REPLACE VIEW purchase_order_details AS
+DROP VIEW IF EXISTS purchase_order_details;
+
+CREATE VIEW purchase_order_details AS
 SELECT
-  po.id AS order_id,
+  po.id,
   po.order_number,
   po.status,
   po.total_amount,
-  po.order_date,
+  po.ordered_at,
   po.expected_delivery_date,
   po.actual_delivery_date,
+  po.supplier_id,
   s.name AS supplier_name,
   s.contact_person AS supplier_contact,
-  p.full_name AS purchaser_name,
+  s.email AS supplier_email,
+  s.phone AS supplier_phone,
+  po.created_by,
+  p.full_name AS creator_name,
+  po.created_at,
   COUNT(poi.id) AS item_count,
   SUM(poi.quantity) AS total_quantity,
   SUM(poi.received_quantity) AS total_received
 FROM purchase_orders po
 LEFT JOIN suppliers s ON po.supplier_id = s.id
-LEFT JOIN profiles p ON po.purchaser_id = p.id
-LEFT JOIN purchase_order_items poi ON po.id = poi.purchase_order_id
+LEFT JOIN profiles p ON po.created_by = p.id
+LEFT JOIN purchase_order_items poi ON po.id = poi.po_id
 GROUP BY po.id, po.order_number, po.status, po.total_amount,
-         po.order_date, po.expected_delivery_date, po.actual_delivery_date,
-         s.name, s.contact_person, p.full_name;
+         po.ordered_at, po.expected_delivery_date, po.actual_delivery_date,
+         po.supplier_id, s.name, s.contact_person, s.email, s.phone,
+         po.created_by, p.full_name, po.created_at;
 
 -- ====================================
 -- 初始化测试数据
 -- ====================================
 
 -- 添加测试供应商
-INSERT INTO suppliers (name, contact_person, email, phone, address, rating) VALUES
-('Baumarkt Schmidt GmbH', 'Hans Schmidt', 'schmidt@baumarkt.de', '+49 30 12345678', 'Berliner Str. 123, 10115 Berlin', 4.5),
-('Werkzeug Meyer AG', 'Anna Meyer', 'meyer@werkzeug.de', '+49 89 87654321', 'Münchner Weg 45, 80333 München', 4.8),
-('Material Express', 'Peter Wagner', 'wagner@material-express.de', '+49 40 55566677', 'Hamburger Allee 67, 20095 Hamburg', 4.2)
+INSERT INTO suppliers (name, contact_person, email, phone, address, city, rating) VALUES
+('Baumarkt Schmidt GmbH', 'Hans Schmidt', 'schmidt@baumarkt.de', '+49 30 12345678', 'Berliner Str. 123', 'Berlin', 5),
+('Werkzeug Meyer AG', 'Anna Meyer', 'meyer@werkzeug.de', '+49 89 87654321', 'Münchner Weg 45', 'München', 5),
+('Material Express', 'Peter Wagner', 'wagner@material-express.de', '+49 40 55566677', 'Hamburger Allee 67', 'Hamburg', 4)
 ON CONFLICT DO NOTHING;
 
 COMMENT ON TABLE suppliers IS '供应商信息表';

@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { api } from '../../lib/api'
-import { ArrowLeft, MapPin, Calendar, Clock, Package } from 'lucide-react'
+import { ArrowLeft, MapPin, Calendar, Clock, Package, Image as ImageIcon } from 'lucide-react'
 
 export default function RequestDetails() {
   const { id } = useParams()
@@ -174,6 +174,43 @@ export default function RequestDetails() {
           ))}
         </div>
       </div>
+
+      {/* Uploaded Images */}
+      {request.images && request.images.length > 0 && (
+        <div className="card">
+          <h2 className="text-xl font-bold text-gray-900 mb-4 flex items-center">
+            <ImageIcon className="h-6 w-6 mr-2" />
+            Hochgeladene Bilder ({request.images.length})
+          </h2>
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+            {request.images.map((img, index) => (
+              <a
+                key={index}
+                href={img.image_url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="block group relative"
+              >
+                <img
+                  src={img.image_url}
+                  alt={img.file_name || `Material ${index + 1}`}
+                  className="w-full h-40 object-cover rounded-lg border-2 border-gray-200 group-hover:border-blue-400 transition-all shadow-sm hover:shadow-md"
+                />
+                <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-10 rounded-lg transition-opacity flex items-center justify-center">
+                  <span className="text-white opacity-0 group-hover:opacity-100 font-medium text-sm bg-blue-600 px-3 py-1 rounded-full">
+                    Vergrößern
+                  </span>
+                </div>
+                {img.file_name && (
+                  <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-50 text-white text-xs p-2 rounded-b-lg truncate">
+                    {img.file_name}
+                  </div>
+                )}
+              </a>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Status History */}
       {history.length > 0 && (
