@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useAuthStore } from '../../store/authStore'
 import { api } from '../../lib/api'
-import { Search, Bell } from 'lucide-react'
+import { Search, Bell, Package, Image as ImageIcon } from 'lucide-react'
 import { format } from 'date-fns'
 
 export default function AllRequests() {
@@ -186,8 +186,51 @@ export default function AllRequests() {
                     <p className="text-xs text-gray-500">{request.baustelle?.name || 'Keine Baustelle'}</p>
                   </div>
 
+                  {/* Request Items */}
+                  {request.items && request.items.length > 0 && (
+                    <div className="mb-3 bg-white/50 rounded-lg p-3">
+                      <div className="flex items-center gap-2 mb-2">
+                        <Package className="h-4 w-4 text-gray-600" />
+                        <span className="text-sm font-semibold text-gray-700">Angeforderte Materialien:</span>
+                      </div>
+                      <div className="space-y-1">
+                        {request.items.map((item, idx) => (
+                          <div key={idx} className="text-sm text-gray-700 pl-6">
+                            • <span className="font-medium">{item.item?.name || 'Unbekannt'}</span> - {item.quantity} {item.unit}
+                            {item.notes && <span className="text-gray-500 text-xs ml-2">({item.notes})</span>}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Images Preview */}
+                  {request.images && request.images.length > 0 && (
+                    <div className="mb-3">
+                      <div className="flex items-center gap-2 mb-2">
+                        <ImageIcon className="h-4 w-4 text-gray-600" />
+                        <span className="text-sm font-semibold text-gray-700">{request.images.length} Bild(er)</span>
+                      </div>
+                      <div className="flex gap-2 overflow-x-auto">
+                        {request.images.slice(0, 3).map((img, idx) => (
+                          <img
+                            key={idx}
+                            src={img.image_url}
+                            alt={img.file_name || `Bild ${idx + 1}`}
+                            className="h-16 w-16 object-cover rounded-lg border-2 border-gray-200"
+                          />
+                        ))}
+                        {request.images.length > 3 && (
+                          <div className="h-16 w-16 bg-gray-100 rounded-lg border-2 border-gray-200 flex items-center justify-center text-xs text-gray-600 font-medium">
+                            +{request.images.length - 3}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
+
                   {request.notes && (
-                    <p className="text-sm text-gray-700 mb-3 font-medium">{request.notes}</p>
+                    <p className="text-sm text-gray-700 mb-3 font-medium italic">{request.notes}</p>
                   )}
 
                   <div className="flex flex-wrap gap-4 text-sm text-gray-600">

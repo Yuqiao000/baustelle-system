@@ -11,6 +11,7 @@ import MyRequests from './pages/worker/MyRequests'
 import RequestDetails from './pages/worker/RequestDetails'
 import LagerDashboard from './pages/lager/LagerDashboard'
 import AllRequests from './pages/lager/AllRequests'
+import LagerRequestDetails from './pages/lager/RequestDetails'
 import InventoryManagement from './pages/lager/InventoryManagement'
 import Statistics from './pages/lager/Statistics'
 import Layout from './components/Layout'
@@ -80,7 +81,7 @@ function App() {
           {/* 仓库端路由 */}
           <Route path="/lager" element={<LagerDashboard />} />
           <Route path="/lager/requests" element={<AllRequests />} />
-          <Route path="/lager/requests/:id" element={<RequestDetails />} />
+          <Route path="/lager/requests/:id" element={<LagerRequestDetails />} />
           <Route path="/lager/inventory" element={<InventoryManagement />} />
           <Route path="/lager/scan" element={<InventoryScan />} />
           <Route path="/lager/barcode-generator" element={<BarcodeGenerator />} />
