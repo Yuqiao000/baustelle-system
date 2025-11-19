@@ -23,7 +23,7 @@ async def get_requests(
 ):
     """获取申请单列表"""
     try:
-        query = supabase.table("requests").select("*").order("created_at", desc=True)
+        query = supabase.table("requests").select("*, worker:profiles!worker_id(*), baustelle:baustellen!baustelle_id(*)").order("created_at", desc=True)
 
         if status_filter:
             query = query.eq("status", status_filter)
@@ -40,7 +40,21 @@ async def get_requests(
         query = query.range(offset, offset + limit - 1)
 
         result = query.execute()
-        return result.data
+
+        # Enrich each request with items and images
+        requests = result.data
+        for request in requests:
+            # Get request items
+            items_result = supabase.table("request_items").select(
+                "*, item:items(*)"
+            ).eq("request_id", request["id"]).execute()
+            request["items"] = items_result.data if items_result.data else []
+
+            # Get request images
+            images_result = supabase.table("request_images").select("*").eq("request_id", request["id"]).execute()
+            request["images"] = images_result.data if images_result.data else []
+
+        return requests
 
     except Exception as e:
         raise HTTPException(
@@ -54,7 +68,7 @@ async def get_request(
     request_id: str,
     supabase: Client = Depends(get_supabase)
 ):
-    """获取申请单详情（包含明细、工人、工地信息）"""
+    """获取申请单详情（包含明细、工人、工地信息、图片）"""
     try:
         # 获取申请单基本信息
         request_result = supabase.table("requests").select("*").eq("id", request_id).execute()
@@ -69,7 +83,7 @@ async def get_request(
 
         # 获取申请单明细
         items_result = supabase.table("request_items").select(
-            "*, items(*)"
+            "*, item:items(*)"
         ).eq("request_id", request_id).execute()
 
         # 获取工人信息
@@ -78,10 +92,14 @@ async def get_request(
         # 获取工地信息
         baustelle_result = supabase.table("baustellen").select("*").eq("id", request_data["baustelle_id"]).execute()
 
+        # 获取图片
+        images_result = supabase.table("request_images").select("*").eq("request_id", request_id).execute()
+
         # 组装数据
         request_data["items"] = items_result.data if items_result.data else []
         request_data["worker"] = worker_result.data[0] if worker_result.data else None
         request_data["baustelle"] = baustelle_result.data[0] if baustelle_result.data else None
+        request_data["images"] = images_result.data if images_result.data else []
 
         return request_data
 
