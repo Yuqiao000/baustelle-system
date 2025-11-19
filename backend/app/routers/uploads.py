@@ -120,39 +120,52 @@ async def upload_multiple_images(
             # 生成唯一文件名
             file_ext = get_file_extension(file.filename)
             unique_filename = f"{uuid.uuid4()}{file_ext}"
-            storage_path = f"request-images/{unique_filename}"
+            storage_path = f"{unique_filename}"  # 简化路径，不使用子文件夹
 
             # 上传到 Supabase Storage
-            result = db.storage.from_("request-images").upload(
-                storage_path,
-                contents,
-                {
-                    "content-type": file.content_type or "image/jpeg",
-                    "cache-control": "3600"
-                }
-            )
+            try:
+                result = db.storage.from_("request-images").upload(
+                    storage_path,
+                    contents,
+                    {
+                        "content-type": file.content_type or "image/jpeg",
+                        "cache-control": "3600",
+                        "upsert": "false"
+                    }
+                )
 
-            if hasattr(result, 'error') and result.error:
+                print(f"Upload result for {file.filename}: {result}")
+
+                if hasattr(result, 'error') and result.error:
+                    print(f"Upload error details: {result.error}")
+                    errors.append({
+                        "filename": file.filename,
+                        "error": f"Storage error: {str(result.error)}"
+                    })
+                    continue
+
+                # 获取公开 URL
+                public_url = db.storage.from_("request-images").get_public_url(storage_path)
+
+                results.append({
+                    "url": public_url,
+                    "filename": file.filename,
+                    "size": len(contents),
+                    "path": storage_path
+                })
+            except Exception as storage_error:
+                print(f"Storage exception for {file.filename}: {str(storage_error)}")
                 errors.append({
                     "filename": file.filename,
-                    "error": f"上传失败: {result.error}"
+                    "error": f"Storage exception: {str(storage_error)}"
                 })
                 continue
 
-            # 获取公开 URL
-            public_url = db.storage.from_("request-images").get_public_url(storage_path)
-
-            results.append({
-                "url": public_url,
-                "filename": file.filename,
-                "size": len(contents),
-                "path": storage_path
-            })
-
         except Exception as e:
+            print(f"General exception for {file.filename}: {str(e)}")
             errors.append({
                 "filename": file.filename,
-                "error": str(e)
+                "error": f"Exception: {str(e)}"
             })
 
     return {

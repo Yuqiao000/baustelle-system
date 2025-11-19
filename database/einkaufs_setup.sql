@@ -125,12 +125,15 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+DROP TRIGGER IF EXISTS update_suppliers_updated_at ON suppliers;
 CREATE TRIGGER update_suppliers_updated_at BEFORE UPDATE ON suppliers
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
+DROP TRIGGER IF EXISTS update_purchase_orders_updated_at ON purchase_orders;
 CREATE TRIGGER update_purchase_orders_updated_at BEFORE UPDATE ON purchase_orders
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
+DROP TRIGGER IF EXISTS update_purchase_requests_updated_at ON purchase_requests;
 CREATE TRIGGER update_purchase_requests_updated_at BEFORE UPDATE ON purchase_requests
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
