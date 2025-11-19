@@ -100,11 +100,15 @@ export default function CreateRequest() {
     files.forEach(file => uploadFormData.append('files', file))
 
     try {
+      console.log('Uploading images:', files.length, 'files')
       const response = await fetch(`${import.meta.env.VITE_API_URL}/api/uploads/images`, {
         method: 'POST',
         body: uploadFormData
       })
+
+      console.log('Upload response status:', response.status)
       const data = await response.json()
+      console.log('Upload response data:', data)
 
       if (data.success && data.uploaded) {
         setFormData(prev => ({
@@ -113,11 +117,15 @@ export default function CreateRequest() {
         }))
         alert(`${data.success_count} Bild(er) erfolgreich hochgeladen`)
       } else {
-        alert('Upload fehlgeschlagen')
+        const errorMsg = data.errors && data.errors.length > 0
+          ? `Upload fehlgeschlagen: ${data.errors[0].error}`
+          : 'Upload fehlgeschlagen: Unbekannter Fehler'
+        console.error('Upload failed:', data)
+        alert(errorMsg)
       }
     } catch (error) {
       console.error('Upload error:', error)
-      alert('Upload fehlgeschlagen')
+      alert(`Upload fehlgeschlagen: ${error.message}`)
     } finally {
       setSubmitting(false)
       // Reset file input
@@ -338,10 +346,12 @@ export default function CreateRequest() {
 
           {/* Image Upload Section */}
           <div className="border-t-2 border-gray-100 pt-6">
-            <label className="block text-sm font-semibold text-gray-700 mb-2">
-              <Camera className="inline h-5 w-5 mr-2" />
-              Bilder hochladen (Optional)
-            </label>
+            <div className="flex items-center mb-2">
+              <Camera className="h-5 w-5 mr-2 text-gray-700" />
+              <label className="block text-sm font-semibold text-gray-700">
+                Bilder hochladen (Optional)
+              </label>
+            </div>
             <p className="text-xs text-gray-500 mb-3">
               Wenn Sie den Namen des Materials nicht wissen, laden Sie ein Bild hoch
             </p>
@@ -350,6 +360,7 @@ export default function CreateRequest() {
               type="file"
               accept="image/*"
               multiple
+              capture="environment"
               onChange={handleImageUpload}
               className="hidden"
               id="image-upload"
@@ -358,12 +369,13 @@ export default function CreateRequest() {
 
             <label
               htmlFor="image-upload"
-              className={`cursor-pointer inline-flex items-center px-4 py-3 bg-blue-50 border-2 border-blue-200 rounded-xl hover:bg-blue-100 transition-all ${
+              className={`cursor-pointer inline-flex items-center justify-center px-6 py-4 bg-blue-50 border-2 border-blue-200 rounded-xl hover:bg-blue-100 transition-all shadow-sm ${
                 submitting ? 'opacity-50 cursor-not-allowed' : ''
               }`}
+              style={{ WebkitTapHighlightColor: 'transparent' }}
             >
-              <ImageIcon className="h-5 w-5 text-blue-600 mr-2" />
-              <span className="text-blue-600 font-medium">Bilder auswählen</span>
+              <ImageIcon className="h-6 w-6 text-blue-600 mr-2 flex-shrink-0" />
+              <span className="text-blue-600 font-medium text-base">Bilder auswählen</span>
             </label>
 
             {/* Image Preview */}
@@ -383,7 +395,8 @@ export default function CreateRequest() {
                       <button
                         type="button"
                         onClick={() => handleRemoveImage(index)}
-                        className="absolute top-2 right-2 bg-red-500 text-white p-1.5 rounded-full hover:bg-red-600 shadow-lg opacity-0 group-hover:opacity-100 transition-opacity"
+                        className="absolute top-2 right-2 bg-red-500 text-white p-1.5 rounded-full hover:bg-red-600 shadow-lg md:opacity-0 md:group-hover:opacity-100 transition-opacity"
+                        style={{ WebkitTapHighlightColor: 'transparent' }}
                       >
                         <X className="h-4 w-4" />
                       </button>
