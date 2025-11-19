@@ -1,6 +1,6 @@
 from fastapi import APIRouter, UploadFile, File, HTTPException, Depends
 from fastapi.responses import JSONResponse
-from ..database import get_supabase
+from ..database import get_supabase, get_supabase_admin
 import uuid
 from typing import List
 import base64
@@ -23,7 +23,7 @@ def is_allowed_file(filename: str) -> bool:
 @router.post("/image")
 async def upload_image(
     file: UploadFile = File(...),
-    db=Depends(get_supabase)
+    db=Depends(get_supabase_admin)
 ):
     """
     上传单个图片到 Supabase Storage
@@ -85,7 +85,7 @@ async def upload_image(
 @router.post("/images")
 async def upload_multiple_images(
     files: List[UploadFile] = File(...),
-    db=Depends(get_supabase)
+    db=Depends(get_supabase_admin)
 ):
     """
     批量上传图片
@@ -180,7 +180,7 @@ async def upload_multiple_images(
 @router.delete("/image")
 async def delete_image(
     path: str,
-    db=Depends(get_supabase)
+    db=Depends(get_supabase_admin)
 ):
     """
     删除图片
