@@ -14,6 +14,9 @@ import AllRequests from './pages/lager/AllRequests'
 import LagerRequestDetails from './pages/lager/RequestDetails'
 import InventoryManagement from './pages/lager/InventoryManagement'
 import Statistics from './pages/lager/Statistics'
+import EinkaufsDashboard from './pages/einkaufs/EinkaufsDashboard'
+import PurchaseOrders from './pages/einkaufs/PurchaseOrders'
+import Suppliers from './pages/einkaufs/Suppliers'
 import Layout from './components/Layout'
 
 // 懒加载扫描相关页面（包含较大的库）
@@ -63,7 +66,9 @@ function App() {
   // 根据角色重定向到不同的首页
   const getDefaultRoute = () => {
     if (!profile) return '/worker'
-    return profile.role === 'worker' ? '/worker' : '/lager'
+    if (profile.role === 'worker') return '/worker'
+    if (profile.role === 'einkaufs') return '/einkaufs'
+    return '/lager'
   }
 
   return (
@@ -86,6 +91,11 @@ function App() {
           <Route path="/lager/scan" element={<InventoryScan />} />
           <Route path="/lager/barcode-generator" element={<BarcodeGenerator />} />
           <Route path="/lager/statistics" element={<Statistics />} />
+
+          {/* 采购端路由 */}
+          <Route path="/einkaufs" element={<EinkaufsDashboard />} />
+          <Route path="/einkaufs/orders" element={<PurchaseOrders />} />
+          <Route path="/einkaufs/suppliers" element={<Suppliers />} />
 
           {/* 404 */}
           <Route path="*" element={<Navigate to={getDefaultRoute()} replace />} />

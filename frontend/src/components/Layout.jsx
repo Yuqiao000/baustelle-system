@@ -1,7 +1,7 @@
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { useAuthStore } from '../store/authStore'
 import { useNotificationStore } from '../store/notificationStore'
-import { Home, Package, FileText, BarChart3, Bell, LogOut, Menu, X, Camera, QrCode } from 'lucide-react'
+import { Home, Package, FileText, BarChart3, Bell, LogOut, Menu, X, Camera, QrCode, ShoppingCart, Users } from 'lucide-react'
 import { useState } from 'react'
 
 export default function Layout({ children }) {
@@ -13,6 +13,7 @@ export default function Layout({ children }) {
 
   const isWorker = profile?.role === 'worker'
   const isLagerOrAdmin = ['lager', 'admin'].includes(profile?.role)
+  const isEinkaufs = profile?.role === 'einkaufs'
 
   const workerLinks = [
     { to: '/worker', icon: Home, label: 'Dashboard' },
@@ -29,7 +30,13 @@ export default function Layout({ children }) {
     { to: '/lager/statistics', icon: BarChart3, label: 'Statistiken' },
   ]
 
-  const links = isWorker ? workerLinks : lagerLinks
+  const einkaufsLinks = [
+    { to: '/einkaufs', icon: Home, label: 'Dashboard' },
+    { to: '/einkaufs/orders', icon: ShoppingCart, label: 'Bestellungen' },
+    { to: '/einkaufs/suppliers', icon: Users, label: 'Lieferanten' },
+  ]
+
+  const links = isWorker ? workerLinks : isEinkaufs ? einkaufsLinks : lagerLinks
 
   const handleSignOut = async () => {
     try {
