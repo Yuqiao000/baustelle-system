@@ -1,8 +1,9 @@
 from fastapi import APIRouter, UploadFile, File, HTTPException, Depends
 from fastapi.responses import JSONResponse
+from pydantic import BaseModel
 from ..database import get_supabase, get_supabase_admin
 import uuid
-from typing import List
+from typing import List, Optional
 import base64
 from datetime import datetime
 
@@ -196,11 +197,19 @@ async def delete_image(
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"删除失败: {str(e)}")
 
+class ImageInfo(BaseModel):
+    url: str
+    filename: Optional[str] = None
+    size: Optional[int] = None
+
+class SaveRequestImagesRequest(BaseModel):
+    request_id: str
+    images: List[ImageInfo]
+    user_id: str
+
 @router.post("/request-images")
 async def save_request_images(
-    request_id: str,
-    images: List[dict],
-    user_id: str,
+    request_data: SaveRequestImagesRequest,
     db=Depends(get_supabase)
 ):
     """
@@ -210,13 +219,13 @@ async def save_request_images(
     try:
         # 插入图片记录
         image_records = []
-        for img in images:
+        for img in request_data.images:
             image_records.append({
-                "request_id": request_id,
-                "image_url": img["url"],
-                "file_name": img.get("filename"),
-                "file_size": img.get("size"),
-                "uploaded_by": user_id
+                "request_id": request_data.request_id,
+                "image_url": img.url,
+                "file_name": img.filename,
+                "file_size": img.size,
+                "uploaded_by": request_data.user_id
             })
 
         if image_records:
