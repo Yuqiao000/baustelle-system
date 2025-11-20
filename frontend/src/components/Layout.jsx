@@ -41,12 +41,11 @@ export default function Layout({ children }) {
   const handleSignOut = async () => {
     try {
       await signOut()
+      // signOut成功后跳转到登录页
+      window.location.href = '/login'
     } catch (error) {
       console.error('Sign out error:', error)
-    } finally {
-      // 无论signOut成功与否，都清除本地状态并跳转到登录页
-      localStorage.clear()
-      sessionStorage.clear()
+      // 即使signOut失败也强制跳转（Supabase会自动清理session）
       window.location.href = '/login'
     }
   }
