@@ -30,6 +30,9 @@ export default function CreateRequest() {
     notes: '',
   })
 
+  const [searchTerm, setSearchTerm] = useState('')
+  const [isQuickMode, setIsQuickMode] = useState(false)
+
   useEffect(() => {
     loadInitialData()
   }, [])
@@ -143,14 +146,26 @@ export default function CreateRequest() {
   const handleSubmit = async (e) => {
     e.preventDefault()
 
-    if (formData.items.length === 0) {
-      alert('Bitte fügen Sie mindestens ein Material/Maschine hinzu')
-      return
-    }
-
-    if (!formData.baustelle_id) {
-      alert('Bitte wählen Sie eine Baustelle aus')
-      return
+    // 快速模式：只需要图片和工地
+    if (isQuickMode) {
+      if (formData.images.length === 0) {
+        alert('Bitte laden Sie mindestens ein Bild hoch')
+        return
+      }
+      if (!formData.baustelle_id) {
+        alert('Bitte wählen Sie eine Baustelle aus')
+        return
+      }
+    } else {
+      // 正常模式：需要物料
+      if (formData.items.length === 0) {
+        alert('Bitte fügen Sie mindestens ein Material/Maschine hinzu')
+        return
+      }
+      if (!formData.baustelle_id) {
+        alert('Bitte wählen Sie eine Baustelle aus')
+        return
+      }
     }
 
     try {
@@ -161,13 +176,17 @@ export default function CreateRequest() {
         priority: formData.priority,
         needed_date: formData.needed_date || null,
         delivery_time: formData.delivery_time || null,
-        notes: formData.notes || null,
-        items: formData.items.map((item) => ({
-          item_id: item.item_id,
-          quantity: parseFloat(item.quantity),
-          unit: item.unit,
-          notes: item.notes || null,
-        })),
+        notes: isQuickMode
+          ? (formData.notes || 'Siehe Bilder für Details')
+          : (formData.notes || null),
+        items: isQuickMode
+          ? [] // 快速模式不需要物料列表
+          : formData.items.map((item) => ({
+              item_id: item.item_id,
+              quantity: parseFloat(item.quantity),
+              unit: item.unit,
+              notes: item.notes || null,
+            })),
       }
 
       const newRequest = await api.createRequest(requestData, user.id)
@@ -220,7 +239,41 @@ export default function CreateRequest() {
           <Plus className="h-8 w-8 text-blue-600" />
           Neuer Antrag
         </h1>
-        <p className="text-gray-500 mb-8">Füllen Sie das Formular aus, um eine neue Materialanfrage zu erstellen</p>
+        <p className="text-gray-500 mb-4">Füllen Sie das Formular aus, um eine neue Materialanfrage zu erstellen</p>
+
+        {/* Mode Toggle */}
+        <div className="mb-6 flex gap-2">
+          <button
+            type="button"
+            onClick={() => setIsQuickMode(false)}
+            className={`flex-1 px-4 py-3 rounded-xl font-semibold transition-all ${
+              !isQuickMode
+                ? 'bg-blue-600 text-white shadow-lg'
+                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+            }`}
+          >
+            📋 Detailliert
+          </button>
+          <button
+            type="button"
+            onClick={() => setIsQuickMode(true)}
+            className={`flex-1 px-4 py-3 rounded-xl font-semibold transition-all ${
+              isQuickMode
+                ? 'bg-green-600 text-white shadow-lg'
+                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+            }`}
+          >
+            📸 Schnell (nur Bilder)
+          </button>
+        </div>
+
+        {isQuickMode && (
+          <div className="mb-6 p-4 bg-green-50 border-2 border-green-200 rounded-xl">
+            <p className="text-sm font-semibold text-green-800">
+              💡 <strong>Schnellmodus:</strong> Laden Sie einfach Fotos des benötigten Materials hoch und fügen Sie eine kurze Beschreibung hinzu. Perfekt für Außeneinsätze!
+            </p>
+          </div>
+        )}
 
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Baustelle Selection */}
@@ -265,26 +318,45 @@ export default function CreateRequest() {
             </div>
           </div>
 
-          {/* Add Items Section */}
-          <div className="border-t-2 border-gray-100 pt-6">
-            <h3 className="text-lg font-bold text-gray-800 mb-4">Material / Maschinen hinzufügen</h3>
+          {/* Add Items Section - Only show in detailed mode */}
+          {!isQuickMode && (
+            <div className="border-t-2 border-gray-100 pt-6">
+              <h3 className="text-lg font-bold text-gray-800 mb-4">Material / Maschinen hinzufügen</h3>
 
-            <div className="grid grid-cols-1 md:grid-cols-12 gap-3 items-end">
-              <div className="md:col-span-6">
-                <label className="block text-xs font-semibold text-gray-600 mb-1">Material / Maschine</label>
-                <select
-                  value={currentItem.item_id}
-                  onChange={(e) => setCurrentItem({ ...currentItem, item_id: e.target.value })}
-                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-gray-50 text-sm font-medium"
-                >
-                  <option value="">Auswählen...</option>
-                  {items.map((item) => (
-                    <option key={item.id} value={item.id}>
-                      {item.name} ({item.type === 'material' ? 'Material' : 'Maschine'})
-                    </option>
-                  ))}
-                </select>
+              {/* Search Input */}
+              <div className="mb-4">
+                <input
+                  type="text"
+                  placeholder="🔍 Material suchen..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="w-full px-4 py-3 border-2 border-blue-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-blue-50 text-sm font-medium placeholder-gray-500"
+                />
               </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-12 gap-3 items-end">
+                <div className="md:col-span-6">
+                  <label className="block text-xs font-semibold text-gray-600 mb-1">Material / Maschine</label>
+                  <select
+                    value={currentItem.item_id}
+                    onChange={(e) => setCurrentItem({ ...currentItem, item_id: e.target.value })}
+                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-gray-50 text-sm font-medium"
+                  >
+                    <option value="">Auswählen...</option>
+                    {items
+                      .filter((item) =>
+                        item.name.toLowerCase().includes(searchTerm.toLowerCase())
+                      )
+                      .map((item) => (
+                        <option key={item.id} value={item.id}>
+                          {item.name} ({item.type === 'material' ? 'Material' : 'Maschine'})
+                        </option>
+                      ))}
+                  </select>
+                  {searchTerm && items.filter((item) => item.name.toLowerCase().includes(searchTerm.toLowerCase())).length === 0 && (
+                    <p className="text-xs text-red-600 mt-1">Keine Ergebnisse gefunden</p>
+                  )}
+                </div>
 
               <div className="md:col-span-2">
                 <label className="block text-xs font-semibold text-gray-600 mb-1">Menge</label>
@@ -343,17 +415,36 @@ export default function CreateRequest() {
               </div>
             )}
           </div>
+          )}
+
+          {/* Quick Mode Notes */}
+          {isQuickMode && (
+            <div className="border-t-2 border-gray-100 pt-6">
+              <label className="block text-sm font-semibold text-gray-700 mb-2">
+                Beschreibung / Bemerkungen
+              </label>
+              <textarea
+                value={formData.notes}
+                onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
+                className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent bg-gray-50 font-medium"
+                rows={4}
+                placeholder="Z.B. 'Brauche 5 Rollen Trassenwarnband und 2 Fähnchen Orange' oder 'Siehe Bilder'"
+              />
+            </div>
+          )}
 
           {/* Image Upload Section */}
           <div className="border-t-2 border-gray-100 pt-6">
             <div className="flex items-center mb-2">
               <Camera className="h-5 w-5 mr-2 text-gray-700" />
               <label className="block text-sm font-semibold text-gray-700">
-                Bilder hochladen (Optional)
+                Bilder hochladen {isQuickMode ? '(Erforderlich *)' : '(Optional)'}
               </label>
             </div>
             <p className="text-xs text-gray-500 mb-3">
-              Wenn Sie den Namen des Materials nicht wissen, laden Sie ein Bild hoch
+              {isQuickMode
+                ? 'Laden Sie Fotos des benötigten Materials hoch'
+                : 'Wenn Sie den Namen des Materials nicht wissen, laden Sie ein Bild hoch'}
             </p>
 
             <input
