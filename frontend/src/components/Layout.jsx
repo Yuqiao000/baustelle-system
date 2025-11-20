@@ -40,18 +40,14 @@ export default function Layout({ children }) {
 
   const handleSignOut = async () => {
     try {
-      const result = await signOut()
-      if (result?.success !== false) {
-        // 即使没有返回success，只要没有错误就继续
-        navigate('/login')
-        window.location.reload()
-      } else {
-        console.error('Sign out failed:', result?.error)
-        alert('Abmeldung fehlgeschlagen. Bitte versuchen Sie es erneut.')
-      }
+      await signOut()
     } catch (error) {
       console.error('Sign out error:', error)
-      alert('Abmeldung fehlgeschlagen. Bitte versuchen Sie es erneut.')
+    } finally {
+      // 无论signOut成功与否，都清除本地状态并跳转到登录页
+      localStorage.clear()
+      sessionStorage.clear()
+      window.location.href = '/login'
     }
   }
 
