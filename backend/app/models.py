@@ -190,10 +190,27 @@ class Request(RequestBase):
     model_config = ConfigDict(from_attributes=True)
 
 
+# ============================================
+# Request Image Models
+# ============================================
+class RequestImage(BaseModel):
+    id: Optional[str] = None
+    request_id: Optional[str] = None
+    image_url: str
+    file_name: Optional[str] = None
+    file_size: Optional[int] = None
+    uploaded_by: Optional[str] = None
+    uploaded_at: Optional[datetime] = None
+    notes: Optional[str] = None
+
+    model_config = ConfigDict(from_attributes=True)
+
+
 class RequestWithDetails(Request):
     items: List[RequestItemWithDetails] = []
     worker: Optional[Profile] = None
     baustelle: Optional[Baustelle] = None
+    images: List[RequestImage] = []
 
 
 # ============================================

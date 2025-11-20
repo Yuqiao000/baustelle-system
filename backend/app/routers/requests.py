@@ -11,7 +11,7 @@ from datetime import datetime
 router = APIRouter(prefix="/requests", tags=["Requests"])
 
 
-@router.get("/", response_model=List[Request])
+@router.get("/", response_model=List[RequestWithDetails])
 async def get_requests(
     status_filter: Optional[str] = Query(None, alias="status", description="Filter by status"),
     baustelle_id: Optional[str] = Query(None, description="Filter by baustelle"),
