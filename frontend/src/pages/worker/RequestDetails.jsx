@@ -152,21 +152,21 @@ export default function RequestDetails() {
       <div className="card">
         <h2 className="text-xl font-bold text-gray-900 mb-4">Bestellte Artikel</h2>
         <div className="space-y-3">
-          {request.items?.map((item) => (
-            <div key={item.id} className="p-4 bg-gray-50 rounded-lg">
+          {request.items?.map((requestItem) => (
+            <div key={requestItem.id} className="p-4 bg-gray-50 rounded-lg">
               <div className="flex justify-between items-start">
                 <div className="flex-1">
-                  <h3 className="font-semibold text-gray-900">{item.items?.name || 'Unbekannt'}</h3>
+                  <h3 className="font-semibold text-gray-900">{requestItem.item?.name || 'Unbekannt'}</h3>
                   <p className="text-sm text-gray-600 mt-1">
-                    Typ: {item.items?.type === 'material' ? 'Material' : 'Maschine'}
+                    Typ: {requestItem.item?.type === 'material' ? 'Material' : 'Maschine'}
                   </p>
-                  {item.notes && (
-                    <p className="text-sm text-gray-600 mt-1">Hinweis: {item.notes}</p>
+                  {requestItem.notes && (
+                    <p className="text-sm text-gray-600 mt-1">Hinweis: {requestItem.notes}</p>
                   )}
                 </div>
                 <div className="text-right">
                   <p className="text-lg font-bold text-gray-900">
-                    {item.quantity} {item.unit}
+                    {requestItem.quantity} {requestItem.unit}
                   </p>
                 </div>
               </div>
