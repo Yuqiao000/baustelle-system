@@ -14,7 +14,7 @@ async def get_notifications(
     limit: int = Query(50, description="Limit number of results"),
     supabase: Client = Depends(get_supabase)
 ):
-    """获取用户通知列表"""
+    """Get user notification list"""
     try:
         query = supabase.table("notifications").select("*").eq("user_id", user_id).order("created_at", desc=True)
 
@@ -38,7 +38,7 @@ async def get_unread_count(
     user_id: str = Query(..., description="User ID"),
     supabase: Client = Depends(get_supabase)
 ):
-    """获取未读通知数量"""
+    """Get unread notification count"""
     try:
         result = supabase.table("notifications").select(
             "id", count="exact"
@@ -58,7 +58,7 @@ async def mark_notification_read(
     notification_id: str,
     supabase: Client = Depends(get_supabase)
 ):
-    """标记通知为已读"""
+    """Mark notification as read"""
     try:
         result = supabase.table("notifications").update({
             "is_read": True
@@ -86,7 +86,7 @@ async def mark_all_notifications_read(
     user_id: str = Query(..., description="User ID"),
     supabase: Client = Depends(get_supabase)
 ):
-    """标记所有通知为已读"""
+    """Mark all notifications as read"""
     try:
         result = supabase.table("notifications").update({
             "is_read": True
@@ -106,7 +106,7 @@ async def delete_notification(
     notification_id: str,
     supabase: Client = Depends(get_supabase)
 ):
-    """删除通知"""
+    """Delete notification"""
     try:
         result = supabase.table("notifications").delete().eq("id", notification_id).execute()
 
@@ -132,7 +132,7 @@ async def create_notification(
     notification: NotificationCreate,
     supabase: Client = Depends(get_supabase)
 ):
-    """创建新通知（系统内部使用）"""
+    """Create new notification (for internal system use)"""
     try:
         notification_data = notification.model_dump()
         result = supabase.table("notifications").insert(notification_data).execute()

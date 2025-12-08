@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.config import settings
-from app.routers import auth, baustellen, items, requests, notifications, statistics, wms, uploads, einkaufs
+from app.routers import auth, baustellen, items, requests, notifications, statistics, wms, uploads, einkaufs, materials, projects, subcontractors, returns, transfers
 
 app = FastAPI(
     title="Baustelle Material Management System",
@@ -28,6 +28,11 @@ app.include_router(statistics.router)
 app.include_router(wms.router)
 app.include_router(uploads.router)
 app.include_router(einkaufs.router)
+app.include_router(materials.router)
+app.include_router(projects.router)
+app.include_router(subcontractors.router)
+app.include_router(returns.router)
+app.include_router(transfers.router)
 
 
 @app.get("/")

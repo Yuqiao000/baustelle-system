@@ -20,10 +20,13 @@ export default function NativeBarcodeScanner({ onScan, onClose }) {
       return
     }
 
-    // 检查是否是 HTTPS 或 localhost
+    // 检查是否是 HTTPS 或 localhost 或局域网 IP（开发环境）
     const isSecure = window.location.protocol === 'https:' ||
                      window.location.hostname === 'localhost' ||
-                     window.location.hostname === '127.0.0.1'
+                     window.location.hostname === '127.0.0.1' ||
+                     window.location.hostname.startsWith('192.168.') ||
+                     window.location.hostname.startsWith('172.') ||
+                     window.location.hostname.startsWith('10.')
 
     if (!isSecure) {
       setCameraSupported(false)

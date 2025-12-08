@@ -1,7 +1,7 @@
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { useAuthStore } from '../store/authStore'
 import { useNotificationStore } from '../store/notificationStore'
-import { Home, Package, FileText, BarChart3, Bell, LogOut, Menu, X, Camera, QrCode, ShoppingCart, Users } from 'lucide-react'
+import { Home, Package, FileText, BarChart3, Bell, LogOut, Menu, X, Camera, QrCode, ShoppingCart, Users, Tag, FolderKanban, PackageMinus, ArrowRightLeft } from 'lucide-react'
 import { useState } from 'react'
 
 export default function Layout({ children }) {
@@ -19,12 +19,18 @@ export default function Layout({ children }) {
     { to: '/worker', icon: Home, label: 'Dashboard' },
     { to: '/worker/new-request', icon: Package, label: 'Neue Anfrage' },
     { to: '/worker/requests', icon: FileText, label: 'Meine Anfragen' },
+    { to: '/worker/returns', icon: PackageMinus, label: 'Rückgaben' },
   ]
 
   const lagerLinks = [
     { to: '/lager', icon: Home, label: 'Dashboard' },
     { to: '/lager/requests', icon: FileText, label: 'Alle Anfragen' },
     { to: '/lager/inventory', icon: Package, label: 'Lagerbestand' },
+    { to: '/lager/materials', icon: Tag, label: 'Materialien' },
+    { to: '/lager/projects', icon: FolderKanban, label: 'Projekte' },
+    { to: '/lager/subcontractors', icon: Users, label: 'Subs' },
+    { to: '/lager/returns', icon: PackageMinus, label: 'Rückgaben' },
+    { to: '/lager/transfers', icon: ArrowRightLeft, label: 'Transfers' },
     { to: '/lager/scan', icon: Camera, label: 'Scannen' },
     { to: '/lager/barcode-generator', icon: QrCode, label: 'QR-Codes' },
     { to: '/lager/statistics', icon: BarChart3, label: 'Statistiken' },
@@ -51,8 +57,14 @@ export default function Layout({ children }) {
   }
 
   const handleNotificationClick = () => {
-    // 简单提示，实际项目中可以打开通知面板
-    alert(`您有 ${unreadCount} 条未读通知`)
+    // 根据角色导航到通知页面
+    if (isWorker) {
+      navigate('/worker/notifications')
+    } else if (isEinkaufs) {
+      navigate('/einkaufs/notifications')
+    } else {
+      navigate('/lager/notifications')
+    }
   }
 
   return (

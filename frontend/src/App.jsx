@@ -9,14 +9,22 @@ import WorkerDashboard from './pages/worker/WorkerDashboard'
 import CreateRequest from './pages/worker/CreateRequest'
 import MyRequests from './pages/worker/MyRequests'
 import RequestDetails from './pages/worker/RequestDetails'
+import CreateReturn from './pages/worker/CreateReturn'
+import MyReturns from './pages/worker/MyReturns'
 import LagerDashboard from './pages/lager/LagerDashboard'
 import AllRequests from './pages/lager/AllRequests'
 import LagerRequestDetails from './pages/lager/RequestDetails'
 import InventoryManagement from './pages/lager/InventoryManagement'
+import MaterialManagement from './pages/lager/MaterialManagement'
+import Projects from './pages/lager/Projects'
+import Returns from './pages/lager/Returns'
+import Transfers from './pages/lager/Transfers'
+import Subcontractors from './pages/lager/Subcontractors'
 import Statistics from './pages/lager/Statistics'
 import EinkaufsDashboard from './pages/einkaufs/EinkaufsDashboard'
 import PurchaseOrders from './pages/einkaufs/PurchaseOrders'
 import Suppliers from './pages/einkaufs/Suppliers'
+import Notifications from './pages/Notifications'
 import Layout from './components/Layout'
 
 // 懒加载扫描相关页面（包含较大的库）
@@ -82,20 +90,30 @@ function App() {
           <Route path="/worker/new-request" element={<CreateRequest />} />
           <Route path="/worker/requests" element={<MyRequests />} />
           <Route path="/worker/requests/:id" element={<RequestDetails />} />
+          <Route path="/worker/returns" element={<MyReturns />} />
+          <Route path="/worker/returns/new" element={<CreateReturn />} />
+          <Route path="/worker/notifications" element={<Notifications />} />
 
           {/* 仓库端路由 */}
           <Route path="/lager" element={<LagerDashboard />} />
           <Route path="/lager/requests" element={<AllRequests />} />
           <Route path="/lager/requests/:id" element={<LagerRequestDetails />} />
           <Route path="/lager/inventory" element={<InventoryManagement />} />
+          <Route path="/lager/materials" element={<MaterialManagement />} />
+          <Route path="/lager/projects" element={<Projects />} />
+          <Route path="/lager/returns" element={<Returns />} />
+          <Route path="/lager/transfers" element={<Transfers />} />
+          <Route path="/lager/subcontractors" element={<Subcontractors />} />
           <Route path="/lager/scan" element={<InventoryScan />} />
           <Route path="/lager/barcode-generator" element={<BarcodeGenerator />} />
           <Route path="/lager/statistics" element={<Statistics />} />
+          <Route path="/lager/notifications" element={<Notifications />} />
 
           {/* 采购端路由 */}
           <Route path="/einkaufs" element={<EinkaufsDashboard />} />
           <Route path="/einkaufs/orders" element={<PurchaseOrders />} />
           <Route path="/einkaufs/suppliers" element={<Suppliers />} />
+          <Route path="/einkaufs/notifications" element={<Notifications />} />
 
           {/* 404 */}
           <Route path="*" element={<Navigate to={getDefaultRoute()} replace />} />

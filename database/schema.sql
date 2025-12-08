@@ -391,10 +391,10 @@ FROM categories c WHERE c.name = 'Werkzeuge'
 UNION ALL
 SELECT
   c.id,
-  'Bagger',
+  'A1.B',
   'maschine',
   'Stück',
-  '挖掘机',
+  'Bagger',
   2,
   1
 FROM categories c WHERE c.name = 'Baumaschinen'

@@ -144,26 +144,84 @@ export default function MyRequests() {
               to={`/worker/requests/${request.id}`}
               className={`block border-2 rounded-2xl p-5 shadow-md hover:shadow-lg transition-all ${getStatusStyle(request.status)}`}
             >
-              <div className="flex flex-col md:flex-row md:items-center md:justify-between">
-                <div className="flex-1">
-                  <div className="flex items-center gap-3 mb-3">
-                    <h3 className="text-base font-bold text-gray-800">{request.request_number}</h3>
-                    <span className={`text-xs px-3 py-1.5 rounded-full font-bold flex items-center gap-1 ${getStatusBadge(request.status)}`}>
-                      {getStatusIcon(request.status)}
-                      {getStatusText(request.status).toUpperCase()}
-                    </span>
-                    {request.priority === 'high' || request.priority === 'urgent' ? (
-                      <span className="text-xs px-3 py-1.5 bg-red-400 text-red-900 rounded-full font-bold">
-                        {request.priority === 'urgent' ? '⚡ DRINGEND' : '🔥 HOCH'}
+              <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
+                <div className="flex-1 space-y-3">
+                  {/* Header with status */}
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-3 flex-wrap">
+                      <h3 className="text-base font-bold text-gray-800">{request.request_number}</h3>
+                      <span className={`text-xs px-3 py-1.5 rounded-full font-bold flex items-center gap-1 ${getStatusBadge(request.status)}`}>
+                        {getStatusIcon(request.status)}
+                        {getStatusText(request.status).toUpperCase()}
                       </span>
-                    ) : null}
+                      {request.priority === 'high' || request.priority === 'urgent' ? (
+                        <span className="text-xs px-3 py-1.5 bg-red-400 text-red-900 rounded-full font-bold">
+                          {request.priority === 'urgent' ? '⚡ DRINGEND' : '🔥 HOCH'}
+                        </span>
+                      ) : null}
+                    </div>
+                    {/* Baustelle name */}
+                    {request.baustelle && (
+                      <p className="text-sm font-semibold text-gray-700">
+                        🏗️ {request.baustelle.name} {request.baustelle.city && `- ${request.baustelle.city}`}
+                      </p>
+                    )}
                   </div>
 
-                  {request.notes && (
-                    <p className="text-sm text-gray-700 mb-3 font-medium line-clamp-2">{request.notes}</p>
+                  {/* Items Preview - Show what was requested */}
+                  {request.items && request.items.length > 0 ? (
+                    <div className="bg-white bg-opacity-70 rounded-lg p-3 border border-gray-200">
+                      <p className="text-xs font-bold text-gray-600 mb-2">📦 ANGEFORDERTE ARTIKEL:</p>
+                      <div className="space-y-1">
+                        {request.items.slice(0, 3).map((item, idx) => (
+                          <div key={idx} className="flex items-center justify-between text-sm">
+                            <span className="font-semibold text-gray-800">
+                              {item.item?.name || item.item_name || item.name || 'Material'}
+                            </span>
+                            <span className="font-bold text-blue-600">{item.quantity} {item.unit}</span>
+                          </div>
+                        ))}
+                        {request.items.length > 3 && (
+                          <p className="text-xs text-gray-600 font-medium pt-1">
+                            + {request.items.length - 3} weitere Artikel...
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="bg-white bg-opacity-70 rounded-lg p-3 border border-gray-200">
+                      <p className="text-xs font-bold text-gray-600 mb-2">📸 SCHNELLANFRAGE (mit Bildern)</p>
+
+                      {/* Show image thumbnails */}
+                      {request.images && request.images.length > 0 ? (
+                        <div className="space-y-2">
+                          <div className="flex gap-2 overflow-x-auto">
+                            {request.images.slice(0, 3).map((img, idx) => (
+                              <img
+                                key={idx}
+                                src={img.image_url}
+                                alt={img.file_name}
+                                className="h-16 w-16 object-cover rounded-lg border-2 border-gray-300 flex-shrink-0"
+                              />
+                            ))}
+                            {request.images.length > 3 && (
+                              <div className="h-16 w-16 bg-gray-200 rounded-lg border-2 border-gray-300 flex items-center justify-center flex-shrink-0">
+                                <span className="text-xs font-bold text-gray-600">+{request.images.length - 3}</span>
+                              </div>
+                            )}
+                          </div>
+                          {request.notes && (
+                            <p className="text-sm text-gray-700 font-medium line-clamp-2 italic">"{request.notes}"</p>
+                          )}
+                        </div>
+                      ) : (
+                        <p className="text-sm text-gray-600 italic">Keine Details verfügbar</p>
+                      )}
+                    </div>
                   )}
 
-                  <div className="flex flex-wrap gap-4 text-sm text-gray-600">
+                  {/* Dates and info */}
+                  <div className="flex flex-wrap gap-4 text-xs text-gray-600">
                     <span className="font-medium">📅 Erstellt: {format(new Date(request.created_at), 'dd.MM.yyyy')}</span>
                     {request.needed_date && (
                       <span className="font-medium">⏰ Benötigt: {format(new Date(request.needed_date), 'dd.MM.yyyy')}</span>

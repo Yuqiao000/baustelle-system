@@ -21,7 +21,7 @@ async def get_requests(
     offset: int = Query(0, description="Offset for pagination"),
     supabase: Client = Depends(get_supabase)
 ):
-    """获取申请单列表"""
+    """Get request list"""
     try:
         query = supabase.table("requests").select("*, worker:profiles!worker_id(*), baustelle:baustellen!baustelle_id(*)").order("created_at", desc=True)
 
@@ -68,9 +68,9 @@ async def get_request(
     request_id: str,
     supabase: Client = Depends(get_supabase)
 ):
-    """获取申请单详情（包含明细、工人、工地信息、图片）"""
+    """Get request details (including items, worker, construction site info, images)"""
     try:
-        # 获取申请单基本信息
+        # Get basic request information
         request_result = supabase.table("requests").select("*").eq("id", request_id).execute()
 
         if not request_result.data:
@@ -81,21 +81,21 @@ async def get_request(
 
         request_data = request_result.data[0]
 
-        # 获取申请单明细
+        # Get request items
         items_result = supabase.table("request_items").select(
             "*, item:items(*)"
         ).eq("request_id", request_id).execute()
 
-        # 获取工人信息
+        # Get worker information
         worker_result = supabase.table("profiles").select("*").eq("id", request_data["worker_id"]).execute()
 
-        # 获取工地信息
+        # Get construction site information
         baustelle_result = supabase.table("baustellen").select("*").eq("id", request_data["baustelle_id"]).execute()
 
-        # 获取图片
+        # Get images
         images_result = supabase.table("request_images").select("*").eq("request_id", request_id).execute()
 
-        # 组装数据
+        # Assemble data
         request_data["items"] = items_result.data if items_result.data else []
         request_data["worker"] = worker_result.data[0] if worker_result.data else None
         request_data["baustelle"] = baustelle_result.data[0] if baustelle_result.data else None
@@ -118,13 +118,13 @@ async def create_request(
     worker_id: str = Query(..., description="Worker ID creating the request"),
     supabase: Client = Depends(get_supabase)
 ):
-    """创建新申请单"""
+    """Create new request"""
     try:
-        # 创建申请单主记录
+        # Create main request record
         request_data = request.model_dump(exclude={"items"})
         request_data["worker_id"] = worker_id
 
-        # 转换日期为字符串
+        # Convert date to string
         if request_data.get("needed_date"):
             request_data["needed_date"] = str(request_data["needed_date"])
 
@@ -138,7 +138,7 @@ async def create_request(
 
         request_id = result.data[0]["id"]
 
-        # 创建申请单明细
+        # Create request items
         items_data = []
         for item in request.items:
             item_dict = item.model_dump()
@@ -167,20 +167,20 @@ async def update_request(
     confirmed_by: Optional[str] = Query(None, description="User ID confirming the request"),
     supabase: Client = Depends(get_supabase)
 ):
-    """更新申请单状态（仅限仓库和管理员）"""
+    """Update request status (warehouse and admin only)"""
     try:
         update_data = request.model_dump(exclude_unset=True)
 
-        # 如果状态变更为已确认，记录确认时间和确认人
+        # If status changes to confirmed, record confirmation time and confirmer
         if update_data.get("status") == "confirmed" and confirmed_by:
             update_data["confirmed_at"] = datetime.now().isoformat()
             update_data["confirmed_by"] = confirmed_by
 
-        # 如果状态变更为已完成，记录完成时间
+        # If status changes to completed, record completion time
         if update_data.get("status") == "completed":
             update_data["completed_at"] = datetime.now().isoformat()
 
-        # 转换日期
+        # Convert date
         if "needed_date" in update_data and update_data["needed_date"]:
             update_data["needed_date"] = str(update_data["needed_date"])
 
@@ -208,7 +208,7 @@ async def cancel_request(
     request_id: str,
     supabase: Client = Depends(get_supabase)
 ):
-    """取消申请单"""
+    """Cancel request"""
     try:
         result = supabase.table("requests").update({
             "status": "cancelled"
@@ -236,7 +236,7 @@ async def get_request_history(
     request_id: str,
     supabase: Client = Depends(get_supabase)
 ):
-    """获取申请单状态变更历史"""
+    """Get request status change history"""
     try:
         result = supabase.table("request_history").select(
             "*"
@@ -257,7 +257,7 @@ async def add_request_item(
     item: dict,
     supabase: Client = Depends(get_supabase)
 ):
-    """向申请单添加物品"""
+    """Add item to request"""
     try:
         item["request_id"] = request_id
         item["quantity"] = str(item["quantity"])
@@ -285,7 +285,7 @@ async def remove_request_item(
     item_id: str,
     supabase: Client = Depends(get_supabase)
 ):
-    """从申请单移除物品"""
+    """Remove item from request"""
     try:
         result = supabase.table("request_items").delete().eq("id", item_id).eq("request_id", request_id).execute()
 
