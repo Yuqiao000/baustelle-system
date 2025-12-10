@@ -53,7 +53,7 @@ CREATE TABLE items (
   category_id UUID REFERENCES categories(id) ON DELETE SET NULL,
   name TEXT NOT NULL,
   type TEXT CHECK (type IN ('material', 'maschine')) NOT NULL,
-  unit TEXT NOT NULL,
+  unit TEXT NOT NULL, -- 单位：kg, m, Stück 等
   description TEXT,
   stock_quantity DECIMAL(10, 2) DEFAULT 0,
   min_stock_level DECIMAL(10, 2) DEFAULT 0,
@@ -68,21 +68,21 @@ CREATE TABLE items (
 -- ============================================
 CREATE TABLE requests (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  request_number TEXT UNIQUE NOT NULL,
+  request_number TEXT UNIQUE NOT NULL, -- 申请单号
   worker_id UUID REFERENCES profiles(id) NOT NULL,
   baustelle_id UUID REFERENCES baustellen(id) NOT NULL,
   status TEXT CHECK (status IN (
-    'pending',
-    'confirmed',
-    'preparing',
-    'ready',
-    'shipped',
-    'completed',
-    'cancelled'
+    'pending',      -- 待处理
+    'confirmed',    -- 已确认
+    'preparing',    -- 准备中
+    'ready',        -- 已准备完成
+    'shipped',      -- 已发货
+    'completed',    -- 已完成
+    'cancelled'     -- 已取消
   )) DEFAULT 'pending',
   priority TEXT CHECK (priority IN ('low', 'normal', 'high', 'urgent')) DEFAULT 'normal',
   needed_date DATE,
-  delivery_time TEXT,
+  delivery_time TEXT, -- 期望送达时间段
   notes TEXT,
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW(),
@@ -225,8 +225,9 @@ DECLARE
   notification_message TEXT;
 BEGIN
   IF (TG_OP = 'INSERT') THEN
-    notification_title := 'Neue Anfrage';
-    notification_message := 'Anfrage ' || NEW.request_number || ' wurde erstellt';
+    -- 工人创建申请后，通知所有仓库管理员
+    notification_title := '新申请单';
+    notification_message := '申请单 ' || NEW.request_number || ' 已创建';
 
     FOR lager_user IN SELECT id FROM profiles WHERE role IN ('lager', 'admin')
     LOOP
@@ -235,8 +236,9 @@ BEGIN
     END LOOP;
 
   ELSIF (TG_OP = 'UPDATE' AND OLD.status IS DISTINCT FROM NEW.status) THEN
-    notification_title := 'Status aktualisiert';
-    notification_message := 'Anfrage ' || NEW.request_number || ' Status: ' || NEW.status;
+    -- 状态变更后，通知申请工人
+    notification_title := '申请单状态更新';
+    notification_message := '申请单 ' || NEW.request_number || ' 状态已更新为: ' || NEW.status;
 
     INSERT INTO notifications (user_id, title, message, type, related_request_id)
     VALUES (NEW.worker_id, notification_title, notification_message, 'status_change', NEW.id);
@@ -263,7 +265,7 @@ ALTER TABLE request_items ENABLE ROW LEVEL SECURITY;
 ALTER TABLE request_history ENABLE ROW LEVEL SECURITY;
 ALTER TABLE notifications ENABLE ROW LEVEL SECURITY;
 
--- Profiles
+-- Profiles: 用户可以看到自己的资料，管理员可以看到所有
 CREATE POLICY "Users can view own profile" ON profiles
   FOR SELECT USING (auth.uid() = id);
 
@@ -275,7 +277,7 @@ CREATE POLICY "Admins can view all profiles" ON profiles
     EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND role = 'admin')
   );
 
--- Baustellen
+-- Baustellen: 所有认证用户可以查看
 CREATE POLICY "Authenticated users can view baustellen" ON baustellen
   FOR SELECT USING (auth.role() = 'authenticated');
 
@@ -284,7 +286,7 @@ CREATE POLICY "Lager and admins can manage baustellen" ON baustellen
     EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND role IN ('lager', 'admin'))
   );
 
--- Categories
+-- Categories: 所有认证用户可以查看
 CREATE POLICY "Authenticated users can view categories" ON categories
   FOR SELECT USING (auth.role() = 'authenticated');
 
@@ -293,7 +295,7 @@ CREATE POLICY "Lager and admins can manage categories" ON categories
     EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND role IN ('lager', 'admin'))
   );
 
--- Items
+-- Items: 所有认证用户可以查看
 CREATE POLICY "Authenticated users can view items" ON items
   FOR SELECT USING (auth.role() = 'authenticated');
 
@@ -302,7 +304,7 @@ CREATE POLICY "Lager and admins can manage items" ON items
     EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND role IN ('lager', 'admin'))
   );
 
--- Requests
+-- Requests: 工人可以查看自己的申请，仓库和管理员可以查看所有
 CREATE POLICY "Workers can view own requests" ON requests
   FOR SELECT USING (worker_id = auth.uid());
 
@@ -319,7 +321,7 @@ CREATE POLICY "Lager and admins can update requests" ON requests
     EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND role IN ('lager', 'admin'))
   );
 
--- Request Items
+-- Request Items: 根据申请单权限
 CREATE POLICY "Users can view request items of accessible requests" ON request_items
   FOR SELECT USING (
     EXISTS (
@@ -335,7 +337,7 @@ CREATE POLICY "Workers can create request items" ON request_items
     EXISTS (SELECT 1 FROM requests WHERE id = request_id AND worker_id = auth.uid())
   );
 
--- Request History
+-- Request History: 根据申请单权限
 CREATE POLICY "Users can view request history of accessible requests" ON request_history
   FOR SELECT USING (
     EXISTS (
@@ -346,7 +348,7 @@ CREATE POLICY "Users can view request history of accessible requests" ON request
     )
   );
 
--- Notifications
+-- Notifications: 用户只能看到自己的通知
 CREATE POLICY "Users can view own notifications" ON notifications
   FOR SELECT USING (user_id = auth.uid());
 
@@ -359,11 +361,83 @@ CREATE POLICY "Users can update own notifications" ON notifications
 
 -- 插入默认类别
 INSERT INTO categories (name, type, description) VALUES
-  ('Werkzeuge', 'maschine', 'Tools'),
-  ('Baumaschinen', 'maschine', 'Construction machinery'),
-  ('Baustoffe', 'material', 'Building materials'),
-  ('Befestigungsmaterial', 'material', 'Fastening materials'),
-  ('Elektromaterial', 'material', 'Electrical materials');
+  ('Werkzeuge', 'maschine', '各类工具'),
+  ('Baumaschinen', 'maschine', '建筑机械'),
+  ('Baustoffe', 'material', '建筑材料'),
+  ('Befestigungsmaterial', 'material', '固定材料'),
+  ('Elektromaterial', 'material', '电气材料');
+
+-- 插入示例材料和设备
+INSERT INTO items (category_id, name, type, unit, description, stock_quantity, min_stock_level)
+SELECT
+  c.id,
+  'Bohrmaschine',
+  'maschine',
+  'Stück',
+  '电钻',
+  5,
+  2
+FROM categories c WHERE c.name = 'Werkzeuge'
+UNION ALL
+SELECT
+  c.id,
+  'Winkelschleifer',
+  'maschine',
+  'Stück',
+  '角磨机',
+  3,
+  1
+FROM categories c WHERE c.name = 'Werkzeuge'
+UNION ALL
+SELECT
+  c.id,
+  'A1.B',
+  'maschine',
+  'Stück',
+  'Bagger',
+  2,
+  1
+FROM categories c WHERE c.name = 'Baumaschinen'
+UNION ALL
+SELECT
+  c.id,
+  'Zement',
+  'material',
+  'Sack',
+  '水泥',
+  500,
+  100
+FROM categories c WHERE c.name = 'Baustoffe'
+UNION ALL
+SELECT
+  c.id,
+  'Sand',
+  'material',
+  'Tonne',
+  '沙子',
+  50,
+  10
+FROM categories c WHERE c.name = 'Baustoffe'
+UNION ALL
+SELECT
+  c.id,
+  'Schrauben M8',
+  'material',
+  'Stück',
+  'M8 螺丝',
+  10000,
+  1000
+FROM categories c WHERE c.name = 'Befestigungsmaterial'
+UNION ALL
+SELECT
+  c.id,
+  'Kabel NYM 3x1,5',
+  'material',
+  'Meter',
+  '电缆线',
+  1000,
+  200
+FROM categories c WHERE c.name = 'Elektromaterial';
 
 -- 插入示例工地
 INSERT INTO baustellen (name, address, city, postal_code, contact_person, contact_phone) VALUES

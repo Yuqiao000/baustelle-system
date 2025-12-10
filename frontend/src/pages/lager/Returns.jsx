@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { PackageMinus, CheckCircle, XCircle, Calendar, User, FileText, Clock } from 'lucide-react'
-import api from '../../api/axios'
+import { api } from '../../lib/api'
 
 export default function Returns() {
   const [returns, setReturns] = useState([])

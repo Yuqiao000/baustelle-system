@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { Users, Plus, Edit2, Trash2, Phone, Mail, Building } from 'lucide-react'
-import api from '../../api/axios'
+import { api } from '../../lib/api'
 
 export default function Subcontractors() {
   const [subcontractors, setSubcontractors] = useState([])

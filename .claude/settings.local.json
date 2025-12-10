@@ -9,7 +9,12 @@
       "Bash(npm run dev:*)",
       "Bash(pip install:*)",
       "Bash(netsh advfirewall firewall show rule:*)",
-      "Bash(netsh advfirewall firewall add rule name=\"Dev Server 3001\" dir=in action=allow protocol=TCP localport=3001 profile=any)"
+      "Bash(netsh advfirewall firewall add rule name=\"Dev Server 3001\" dir=in action=allow protocol=TCP localport=3001 profile=any)",
+      "Bash(echo \"在服务器 SSH 终端运行以下命令：\n\ncd /root\ngit clone https://github.com/Yuqiao000/baustelle-system.git\ncd baustelle-system\nls -la\n\n# 克隆成功后会看到项目文件夹和所有文件\")",
+      "Bash(ssh:*)",
+      "Bash(scp:*)",
+      "Bash(find:*)",
+      "Bash(git add:*)"
     ],
     "deny": [],
     "ask": []

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { Plus, Edit2, Trash2, Users, Calendar, FileText, Package } from 'lucide-react'
-import api from '../../api/axios'
+import { api } from '../../lib/api'
 
 export default function Projects() {
   const [projects, setProjects] = useState([])

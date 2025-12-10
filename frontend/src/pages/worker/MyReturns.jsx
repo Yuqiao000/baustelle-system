@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { PackageMinus, Plus, Calendar, FileText, CheckCircle, XCircle, Clock } from 'lucide-react'
-import api from '../../api/axios'
+import { api } from '../../lib/api'
 import { useAuthStore } from '../../store/authStore'
 
 export default function MyReturns() {

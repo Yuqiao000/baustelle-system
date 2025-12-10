@@ -1,7 +1,7 @@
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { useAuthStore } from '../store/authStore'
 import { useNotificationStore } from '../store/notificationStore'
-import { Home, Package, FileText, BarChart3, Bell, LogOut, Menu, X, Camera, QrCode, ShoppingCart, Users, Tag, FolderKanban, PackageMinus, ArrowRightLeft } from 'lucide-react'
+import { Home, Package, FileText, BarChart3, Bell, LogOut, Menu, X, Camera, Settings, PackageMinus } from 'lucide-react'
 import { useState } from 'react'
 
 export default function Layout({ children }) {
@@ -13,7 +13,6 @@ export default function Layout({ children }) {
 
   const isWorker = profile?.role === 'worker'
   const isLagerOrAdmin = ['lager', 'admin'].includes(profile?.role)
-  const isEinkaufs = profile?.role === 'einkaufs'
 
   const workerLinks = [
     { to: '/worker', icon: Home, label: 'Dashboard' },
@@ -24,44 +23,27 @@ export default function Layout({ children }) {
 
   const lagerLinks = [
     { to: '/lager', icon: Home, label: 'Dashboard' },
-    { to: '/lager/requests', icon: FileText, label: 'Alle Anfragen' },
-    { to: '/lager/inventory', icon: Package, label: 'Lagerbestand' },
-    { to: '/lager/materials', icon: Tag, label: 'Materialien' },
-    { to: '/lager/projects', icon: FolderKanban, label: 'Projekte' },
-    { to: '/lager/subcontractors', icon: Users, label: 'Subs' },
-    { to: '/lager/returns', icon: PackageMinus, label: 'Rückgaben' },
-    { to: '/lager/transfers', icon: ArrowRightLeft, label: 'Transfers' },
+    { to: '/lager/materials', icon: Package, label: 'Materialien' },
     { to: '/lager/scan', icon: Camera, label: 'Scannen' },
-    { to: '/lager/barcode-generator', icon: QrCode, label: 'QR-Codes' },
-    { to: '/lager/statistics', icon: BarChart3, label: 'Statistiken' },
+    { to: '/lager/statistics', icon: BarChart3, label: 'Statistik' },
+    { to: '/lager/settings', icon: Settings, label: 'Einstellungen' },
   ]
 
-  const einkaufsLinks = [
-    { to: '/einkaufs', icon: Home, label: 'Dashboard' },
-    { to: '/einkaufs/orders', icon: ShoppingCart, label: 'Bestellungen' },
-    { to: '/einkaufs/suppliers', icon: Users, label: 'Lieferanten' },
-  ]
-
-  const links = isWorker ? workerLinks : isEinkaufs ? einkaufsLinks : lagerLinks
+  const links = isWorker ? workerLinks : lagerLinks
 
   const handleSignOut = async () => {
     try {
       await signOut()
-      // signOut成功后跳转到登录页
       window.location.href = '/login'
     } catch (error) {
       console.error('Sign out error:', error)
-      // 即使signOut失败也强制跳转（Supabase会自动清理session）
       window.location.href = '/login'
     }
   }
 
   const handleNotificationClick = () => {
-    // 根据角色导航到通知页面
     if (isWorker) {
       navigate('/worker/notifications')
-    } else if (isEinkaufs) {
-      navigate('/einkaufs/notifications')
     } else {
       navigate('/lager/notifications')
     }
@@ -78,9 +60,9 @@ export default function Layout({ children }) {
               <Package className="h-8 w-8 text-white" />
               <div className="ml-2">
                 <span className="text-xl font-bold text-white">
-                  Baustelle System
+                  Smart-Logistik
                 </span>
-                <p className="text-xs text-blue-100">Material Management</p>
+                <p className="text-xs text-blue-100">Intelligente Logistik</p>
               </div>
             </div>
 

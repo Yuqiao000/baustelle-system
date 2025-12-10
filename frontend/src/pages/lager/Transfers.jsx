@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { ArrowRightLeft, Plus, CheckCircle, XCircle, Calendar, User, FileText, Clock, Truck } from 'lucide-react'
-import api from '../../api/axios'
+import { api } from '../../lib/api'
 
 export default function Transfers() {
   const [transfers, setTransfers] = useState([])

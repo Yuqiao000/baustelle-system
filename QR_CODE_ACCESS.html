@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart-Logistik - QR Code 快速访问</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "PingFang SC", "Microsoft YaHei", sans-serif;
+            background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        .container {
+            background: white;
+            border-radius: 24px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            text-align: center;
+            max-width: 600px;
+            width: 100%;
+        }
+        .logo {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 20px;
+            background: linear-gradient(135deg, #0ea5e9, #0284c7);
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 36px;
+            font-weight: bold;
+            color: white;
+        }
+        h1 {
+            color: #1e293b;
+            font-size: 32px;
+            margin-bottom: 10px;
+        }
+        .subtitle {
+            color: #64748b;
+            font-size: 16px;
+            margin-bottom: 30px;
+        }
+        .qr-container {
+            background: #f8fafc;
+            border-radius: 16px;
+            padding: 30px;
+            margin: 30px 0;
+            border: 3px solid #e2e8f0;
+        }
+        .qr-code {
+            width: 100%;
+            max-width: 300px;
+            height: 300px;
+            margin: 0 auto;
+            display: block;
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+        }
+        .url-box {
+            background: #f1f5f9;
+            padding: 16px;
+            border-radius: 12px;
+            margin: 20px 0;
+        }
+        .url {
+            font-family: "Courier New", monospace;
+            font-size: 18px;
+            color: #0284c7;
+            font-weight: bold;
+            word-break: break-all;
+            margin-bottom: 10px;
+        }
+        .copy-btn {
+            background: #0ea5e9;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-size: 14px;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: background 0.2s;
+        }
+        .copy-btn:hover {
+            background: #0284c7;
+        }
+        .copy-btn:active {
+            transform: scale(0.98);
+        }
+        .instructions {
+            text-align: left;
+            background: #f8fafc;
+            padding: 20px;
+            border-radius: 12px;
+            margin-top: 20px;
+        }
+        .instructions h3 {
+            color: #0ea5e9;
+            font-size: 18px;
+            margin-bottom: 12px;
+        }
+        .instructions ol {
+            padding-left: 20px;
+            color: #475569;
+            line-height: 1.8;
+        }
+        .instructions li {
+            margin-bottom: 8px;
+        }
+        .badge {
+            display: inline-block;
+            background: #dcfce7;
+            color: #166534;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            margin: 10px 5px;
+        }
+        .badge.blue {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+        .info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-top: 20px;
+            text-align: left;
+        }
+        .info-item {
+            background: #f8fafc;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #0ea5e9;
+        }
+        .info-label {
+            font-size: 12px;
+            color: #64748b;
+            margin-bottom: 5px;
+        }
+        .info-value {
+            font-size: 16px;
+            color: #1e293b;
+            font-weight: 600;
+        }
+        @media (max-width: 600px) {
+            .info-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        @media print {
+            body {
+                background: white;
+            }
+            .container {
+                box-shadow: none;
+            }
+            .copy-btn {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="logo">SL</div>
+        <h1>Smart-Logistik</h1>
+        <p class="subtitle">Intelligente Logistik- und Materialverwaltung</p>
+
+        <div class="qr-container">
+            <canvas id="qrcode" class="qr-code"></canvas>
+        </div>
+
+        <div class="url-box">
+            <div class="url" id="url">http://46.224.89.155:3000</div>
+            <button class="copy-btn" onclick="copyUrl()">📋 URL 复制</button>
+        </div>
+
+        <div style="margin: 20px 0;">
+            <span class="badge">✓ 服务器运行中</span>
+            <span class="badge blue">Hetzner Nuremberg</span>
+        </div>
+
+        <div class="info-grid">
+            <div class="info-item">
+                <div class="info-label">服务器 IP</div>
+                <div class="info-value">46.224.89.155</div>
+            </div>
+            <div class="info-item">
+                <div class="info-label">端口</div>
+                <div class="info-value">3000</div>
+            </div>
+            <div class="info-item">
+                <div class="info-label">服务器位置</div>
+                <div class="info-value">🇩🇪 Nuremberg</div>
+            </div>
+            <div class="info-item">
+                <div class="info-label">月成本</div>
+                <div class="info-value">€3.56/月</div>
+            </div>
+        </div>
+
+        <div class="instructions">
+            <h3>📱 手机扫码使用方法：</h3>
+            <ol>
+                <li><strong>打开手机相机</strong> - 使用手机自带的相机应用</li>
+                <li><strong>对准二维码</strong> - 将相机对准上方的二维码</li>
+                <li><strong>点击通知</strong> - 屏幕顶部会出现一个通知，点击它</li>
+                <li><strong>开始使用</strong> - 浏览器会自动打开 Smart-Logistik 系统</li>
+                <li><strong>添加到主屏幕</strong>（可选）- 在浏览器菜单中选择"添加到主屏幕"，就可以像 App 一样使用了！</li>
+            </ol>
+        </div>
+
+        <div class="instructions" style="margin-top: 15px;">
+            <h3>💻 电脑访问方法：</h3>
+            <ol>
+                <li>点击上方 URL 旁边的 "📋 URL 复制" 按钮</li>
+                <li>在浏览器地址栏粘贴并访问</li>
+                <li>或者直接访问：<strong>http://46.224.89.155:3000</strong></li>
+            </ol>
+        </div>
+
+        <p style="margin-top: 20px; color: #94a3b8; font-size: 14px;">
+            💡 提示：您可以打印这个页面或保存书签，方便随时访问
+        </p>
+
+        <p style="margin-top: 10px; color: #94a3b8; font-size: 12px;">
+            如需查看在线版二维码页面，访问：<br>
+            <a href="http://46.224.89.155:3000/qr.html" style="color: #0ea5e9;">http://46.224.89.155:3000/qr.html</a>
+        </p>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+    <script>
+        // 生成二维码
+        const url = 'http://46.224.89.155:3000';
+        QRCode.toCanvas(document.getElementById('qrcode'), url, {
+            width: 300,
+            margin: 2,
+            color: {
+                dark: '#0284c7',
+                light: '#ffffff'
+            }
+        });
+
+        // 复制 URL 功能
+        function copyUrl() {
+            const urlText = document.getElementById('url').textContent;
+            navigator.clipboard.writeText(urlText).then(() => {
+                const btn = event.target;
+                const originalText = btn.textContent;
+                btn.textContent = '✓ 已复制！';
+                btn.style.background = '#10b981';
+                setTimeout(() => {
+                    btn.textContent = originalText;
+                    btn.style.background = '#0ea5e9';
+                }, 2000);
+            }).catch(err => {
+                alert('复制失败，请手动复制 URL');
+            });
+        }
+    </script>
+</body>
+</html>

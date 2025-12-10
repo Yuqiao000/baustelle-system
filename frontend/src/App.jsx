@@ -15,12 +15,13 @@ import LagerDashboard from './pages/lager/LagerDashboard'
 import AllRequests from './pages/lager/AllRequests'
 import LagerRequestDetails from './pages/lager/RequestDetails'
 import InventoryManagement from './pages/lager/InventoryManagement'
-import MaterialManagement from './pages/lager/MaterialManagement'
+import MaterialienNew from './pages/lager/MaterialienNew'
 import Projects from './pages/lager/Projects'
 import Returns from './pages/lager/Returns'
 import Transfers from './pages/lager/Transfers'
 import Subcontractors from './pages/lager/Subcontractors'
 import Statistics from './pages/lager/Statistics'
+import Settings from './pages/lager/Settings'
 import EinkaufsDashboard from './pages/einkaufs/EinkaufsDashboard'
 import PurchaseOrders from './pages/einkaufs/PurchaseOrders'
 import Suppliers from './pages/einkaufs/Suppliers'
@@ -96,18 +97,21 @@ function App() {
 
           {/* 仓库端路由 */}
           <Route path="/lager" element={<LagerDashboard />} />
+          <Route path="/lager/materials" element={<MaterialienNew />} />
+          <Route path="/lager/scan" element={<InventoryScan />} />
+          <Route path="/lager/statistics" element={<Statistics />} />
+          <Route path="/lager/settings" element={<Settings />} />
+          <Route path="/lager/notifications" element={<Notifications />} />
+
+          {/* Legacy routes - keep for backward compatibility */}
           <Route path="/lager/requests" element={<AllRequests />} />
           <Route path="/lager/requests/:id" element={<LagerRequestDetails />} />
           <Route path="/lager/inventory" element={<InventoryManagement />} />
-          <Route path="/lager/materials" element={<MaterialManagement />} />
           <Route path="/lager/projects" element={<Projects />} />
           <Route path="/lager/returns" element={<Returns />} />
           <Route path="/lager/transfers" element={<Transfers />} />
           <Route path="/lager/subcontractors" element={<Subcontractors />} />
-          <Route path="/lager/scan" element={<InventoryScan />} />
           <Route path="/lager/barcode-generator" element={<BarcodeGenerator />} />
-          <Route path="/lager/statistics" element={<Statistics />} />
-          <Route path="/lager/notifications" element={<Notifications />} />
 
           {/* 采购端路由 */}
           <Route path="/einkaufs" element={<EinkaufsDashboard />} />
