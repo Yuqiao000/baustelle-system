@@ -263,10 +263,11 @@ export default function MaterialienNew() {
       groups[baseName].totalQuantity += Number(material.stock_quantity || material.current_quantity || 0)
       groups[baseName].totalValue += (Number(material.stock_quantity || material.current_quantity || 0) * Number(material.unit_price || 0))
       groups[baseName].minQuantity += Number(material.min_stock_level || material.min_quantity || 0)
+    })
 
-      if ((material.stock_quantity || material.current_quantity || 0) <= (material.min_stock_level || material.min_quantity || 0)) {
-        groups[baseName].isLowStock = true
-      }
+    // Check low stock status after totals are calculated
+    Object.values(groups).forEach(group => {
+      group.isLowStock = group.totalQuantity <= group.minQuantity
     })
 
     return Object.values(groups)
