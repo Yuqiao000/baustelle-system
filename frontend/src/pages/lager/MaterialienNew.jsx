@@ -469,7 +469,7 @@ export default function MaterialienNew() {
                               </td>
                               <td className="px-6 py-4 whitespace-nowrap">
                                 <div className="text-sm text-gray-900 font-semibold">
-                                  {group.totalQuantity}
+                                  {hasMultipleItems ? group.totalQuantity.toFixed(1) : (group.items[0].stock_quantity || group.items[0].current_quantity || 0)}
                                 </div>
                               </td>
                               <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
