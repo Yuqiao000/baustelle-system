@@ -263,11 +263,13 @@ export default function MaterialienNew() {
       groups[baseName].totalQuantity += Number(material.stock_quantity || material.current_quantity || 0)
       groups[baseName].totalValue += (Number(material.stock_quantity || material.current_quantity || 0) * Number(material.unit_price || 0))
       groups[baseName].minQuantity += Number(material.min_stock_level || material.min_quantity || 0)
-    })
 
-    // Check low stock status after totals are calculated
-    Object.values(groups).forEach(group => {
-      group.isLowStock = group.totalQuantity <= group.minQuantity
+      // Mark group as low stock if ANY variant is low
+      const itemQty = Number(material.stock_quantity || material.current_quantity || 0)
+      const itemMin = Number(material.min_stock_level || material.min_quantity || 0)
+      if (itemQty <= itemMin) {
+        groups[baseName].isLowStock = true
+      }
     })
 
     return Object.values(groups)
@@ -493,10 +495,10 @@ export default function MaterialienNew() {
 
                             {/* Expanded detail rows */}
                             {hasMultipleItems && isExpanded && group.items.map((material) => {
-                              const itemQuantity = material.stock_quantity || material.current_quantity || 0
-                              const itemMinQuantity = material.min_stock_level || material.min_quantity || 0
+                              const itemQuantity = Number(material.stock_quantity || material.current_quantity || 0)
+                              const itemMinQuantity = Number(material.min_stock_level || material.min_quantity || 0)
                               const isItemLowStock = itemQuantity <= itemMinQuantity
-                              const itemValue = itemQuantity * (material.unit_price || 0)
+                              const itemValue = itemQuantity * Number(material.unit_price || 0)
 
                               // Extract color/variant name
                               let variantName = material.name.replace(group.baseName, '').trim()
