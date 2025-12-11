@@ -285,6 +285,40 @@ export default function MaterialienNew() {
     setExpandedGroups(newExpanded)
   }
 
+  // Filter grouped materials based on filters
+  const filterGroups = (groups) => {
+    return groups.filter(group => {
+      // Lagerstand filter
+      if (filters.lagerstand !== 'all') {
+        if (filters.lagerstand === 'sufficient' && group.isLowStock) {
+          return false
+        }
+        if (filters.lagerstand === 'low' && !group.isLowStock) {
+          return false
+        }
+        if (filters.lagerstand === 'out') {
+          const hasStock = group.totalQuantity > 0
+          if (hasStock) return false
+        }
+      }
+
+      // Search filter
+      if (filters.search) {
+        const searchLower = filters.search.toLowerCase()
+        const matchesName = group.baseName.toLowerCase().includes(searchLower)
+        const matchesVariants = group.items.some(item =>
+          item.name.toLowerCase().includes(searchLower) ||
+          (item.description && item.description.toLowerCase().includes(searchLower))
+        )
+        if (!matchesName && !matchesVariants) {
+          return false
+        }
+      }
+
+      return true
+    })
+  }
+
   return (
     <div className="space-y-6">
       {/* Page Header */}
@@ -437,7 +471,7 @@ export default function MaterialienNew() {
                       </tr>
                     </thead>
                     <tbody className="bg-white divide-y divide-gray-200">
-                      {groupMaterials(materials).map((group) => {
+                      {filterGroups(groupMaterials(materials)).map((group) => {
                         const isExpanded = expandedGroups.has(group.baseName)
                         const hasMultipleItems = group.items.length > 1
 
