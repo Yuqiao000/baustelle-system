@@ -260,9 +260,9 @@ export default function MaterialienNew() {
       }
 
       groups[baseName].items.push(material)
-      groups[baseName].totalQuantity += (material.stock_quantity || material.current_quantity || 0)
-      groups[baseName].totalValue += ((material.stock_quantity || material.current_quantity || 0) * (material.unit_price || 0))
-      groups[baseName].minQuantity += (material.min_stock_level || material.min_quantity || 0)
+      groups[baseName].totalQuantity += Number(material.stock_quantity || material.current_quantity || 0)
+      groups[baseName].totalValue += (Number(material.stock_quantity || material.current_quantity || 0) * Number(material.unit_price || 0))
+      groups[baseName].minQuantity += Number(material.min_stock_level || material.min_quantity || 0)
 
       if ((material.stock_quantity || material.current_quantity || 0) <= (material.min_stock_level || material.min_quantity || 0)) {
         groups[baseName].isLowStock = true
