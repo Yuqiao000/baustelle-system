@@ -36,9 +36,30 @@ export default function MaterialienNew() {
   // Collapsible groups state
   const [expandedGroups, setExpandedGroups] = useState(new Set())
 
+  // Categories and projects for filtering
+  const [categories, setCategories] = useState([])
+  const [baustellen, setBaustellen] = useState([])
+
   useEffect(() => {
     loadData()
   }, [filters, currentPage, itemsPerPage, activeTab])
+
+  useEffect(() => {
+    loadCategoriesAndProjects()
+  }, [])
+
+  const loadCategoriesAndProjects = async () => {
+    try {
+      const [categoriesData, baustellenData] = await Promise.all([
+        api.request('/items/categories/?type=material'),
+        api.getBaustellen({ is_active: true })
+      ])
+      setCategories(categoriesData)
+      setBaustellen(baustellenData)
+    } catch (error) {
+      console.error('Error loading categories and projects:', error)
+    }
+  }
 
   const loadData = async () => {
     setLoading(true)
@@ -288,6 +309,22 @@ export default function MaterialienNew() {
   // Filter grouped materials based on filters
   const filterGroups = (groups) => {
     return groups.filter(group => {
+      // Projekt filter - map projekt name to category name
+      if (filters.projekt) {
+        const selectedBaustelle = baustellen.find(b => b.id === filters.projekt)
+        if (selectedBaustelle) {
+          // Find matching category by name
+          const matchingCategory = categories.find(c => c.name === selectedBaustelle.name)
+          if (matchingCategory) {
+            // Check if any item in the group belongs to this category
+            const belongsToCategory = group.items.some(item => item.category_id === matchingCategory.id)
+            if (!belongsToCategory) {
+              return false
+            }
+          }
+        }
+      }
+
       // Lagerstand filter
       if (filters.lagerstand !== 'all') {
         if (filters.lagerstand === 'sufficient' && group.isLowStock) {
