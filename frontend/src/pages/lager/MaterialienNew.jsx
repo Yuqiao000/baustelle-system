@@ -459,6 +459,15 @@ export default function MaterialienNew() {
                                       )}
                                     </div>
                                   )}
+                                  {/* Material thumbnail image */}
+                                  {group.items[0].image_url && (
+                                    <img
+                                      src={`/${group.items[0].image_url}`}
+                                      alt={group.baseName}
+                                      className="h-10 w-10 rounded object-cover mr-3"
+                                      onError={(e) => e.target.style.display = 'none'}
+                                    />
+                                  )}
                                   <div>
                                     <div className="text-sm font-medium text-gray-900">
                                       {group.baseName}
