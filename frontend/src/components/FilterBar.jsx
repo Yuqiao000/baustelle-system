@@ -15,7 +15,7 @@ export default function FilterBar({ filters, onFilterChange, onExport, showExpor
   const loadFilterOptions = async () => {
     try {
       // 加载项目列表
-      const projectsData = await api.request('/projects?is_active=true')
+      const projectsData = await api.getBaustellen({ is_active: true })
       setProjects(projectsData)
 
       // 加载 Subs 列表
