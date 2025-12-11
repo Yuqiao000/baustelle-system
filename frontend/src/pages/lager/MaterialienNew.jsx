@@ -318,6 +318,15 @@ export default function MaterialienNew() {
         }
       }
 
+      // Kategorie filter
+      if (filters.kategorie) {
+        // Check if any item in the group belongs to this category
+        const belongsToCategory = group.items.some(item => item.category_id === filters.kategorie)
+        if (!belongsToCategory) {
+          return false
+        }
+      }
+
       // Lagerstand filter
       if (filters.lagerstand !== 'all') {
         if (filters.lagerstand === 'sufficient' && group.isLowStock) {
