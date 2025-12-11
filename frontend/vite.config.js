@@ -9,9 +9,9 @@ export default defineConfig({
       registerType: 'autoUpdate',
       includeAssets: ['favicon.ico', 'robots.txt', 'apple-touch-icon.png'],
       manifest: {
-        name: 'Baustelle Material System',
-        short_name: 'BaustelleApp',
-        description: '工地物资申领系统',
+        name: 'Smart-Logistics',
+        short_name: 'Smart-Logistics',
+        description: 'Intelligent Material Management System',
         theme_color: '#2563eb',
         background_color: '#ffffff',
         display: 'standalone',
