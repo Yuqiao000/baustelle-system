@@ -321,6 +321,10 @@ export default function MaterialienNew() {
             if (!belongsToCategory) {
               return false
             }
+          } else {
+            // If no matching category found for this projekt, hide all materials
+            // (materials are only shown if they belong to a category with the same name as the projekt)
+            return false
           }
         }
       }
