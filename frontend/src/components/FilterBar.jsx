@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { X, Filter, Download } from 'lucide-react'
+import { api } from '../lib/api'
 
 export default function FilterBar({ filters, onFilterChange, onExport, showExport = false }) {
   const [projects, setProjects] = useState([])
@@ -14,13 +15,11 @@ export default function FilterBar({ filters, onFilterChange, onExport, showExpor
   const loadFilterOptions = async () => {
     try {
       // 加载项目列表
-      const projectsRes = await fetch(`${import.meta.env.VITE_API_URL}/projects?is_active=true`)
-      const projectsData = await projectsRes.json()
+      const projectsData = await api.request('/projects?is_active=true')
       setProjects(projectsData)
 
       // 加载 Subs 列表
-      const subsRes = await fetch(`${import.meta.env.VITE_API_URL}/subcontractors?is_active=true`)
-      const subsData = await subsRes.json()
+      const subsData = await api.request('/subcontractors?is_active=true')
       setSubs(subsData)
 
       // 材料类别 - 可以从 API 获取或硬编码

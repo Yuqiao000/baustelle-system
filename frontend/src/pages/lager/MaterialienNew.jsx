@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { Package, TrendingUp, AlertTriangle, DollarSign, ArrowUpDown, Download, FileSpreadsheet, ChevronDown, ChevronRight } from 'lucide-react'
 import FilterBar from '../../components/FilterBar'
 import Pagination from '../../components/Pagination'
+import { api } from '../../lib/api'
 
 export default function MaterialienNew() {
   const [activeTab, setActiveTab] = useState('lagerbestand')
@@ -101,8 +102,7 @@ export default function MaterialienNew() {
 
   const loadMaterials = async () => {
     const query = buildQueryParams()
-    const response = await fetch(`${import.meta.env.VITE_API_URL}/items?${query}`)
-    const data = await response.json()
+    const data = await api.request(`/items?${query}`)
 
     setMaterials(Array.isArray(data) ? data : data.items || [])
     setTotalItems(data.total || (Array.isArray(data) ? data.length : 0))
@@ -111,15 +111,11 @@ export default function MaterialienNew() {
   const loadMovements = async () => {
     const query = buildQueryParams()
     // Combine all incoming and outgoing records
-    const [requestsRes, returnsRes, transfersRes] = await Promise.all([
-      fetch(`${import.meta.env.VITE_API_URL}/requests?${query}`),
-      fetch(`${import.meta.env.VITE_API_URL}/returns?${query}`),
-      fetch(`${import.meta.env.VITE_API_URL}/transfers?${query}`)
+    const [requestsData, returnsData, transfersData] = await Promise.all([
+      api.request(`/requests?${query}`),
+      api.request(`/returns?${query}`),
+      api.request(`/transfers?${query}`)
     ])
-
-    const requestsData = await requestsRes.json()
-    const returnsData = await returnsRes.json()
-    const transfersData = await transfersRes.json()
 
     // Merge and label types
     const allMovements = [
@@ -137,8 +133,7 @@ export default function MaterialienNew() {
 
   const loadRequests = async () => {
     const query = buildQueryParams()
-    const response = await fetch(`${import.meta.env.VITE_API_URL}/requests?${query}`)
-    const data = await response.json()
+    const data = await api.request(`/requests?${query}`)
 
     setRequests(Array.isArray(data) ? data : data.items || [])
     setTotalItems(data.total || (Array.isArray(data) ? data.length : 0))
@@ -147,15 +142,13 @@ export default function MaterialienNew() {
   const loadStatistics = async () => {
     // Load statistics data
     const query = buildQueryParams()
-    const response = await fetch(`${import.meta.env.VITE_API_URL}/statistics?${query}`)
-    const data = await response.json()
+    const data = await api.request(`/statistics?${query}`)
     // TODO: Process statistics data
   }
 
   const loadQuickStats = async () => {
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/dashboard/stats`)
-      const data = await response.json()
+      const data = await api.request('/dashboard/stats')
       setStats({
         totalMaterials: data.total_materials || 0,
         totalValue: data.total_value || 0,
@@ -175,7 +168,7 @@ export default function MaterialienNew() {
   const handleExport = async () => {
     try {
       const query = buildQueryParams()
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/export/${activeTab}?${query}`)
+      const response = await fetch(`/api/export/${activeTab}?${query}`)
       const blob = await response.blob()
       const url = window.URL.createObjectURL(blob)
       const a = document.createElement('a')
