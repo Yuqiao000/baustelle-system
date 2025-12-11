@@ -22,14 +22,9 @@ export default function FilterBar({ filters, onFilterChange, onExport, showExpor
       const subsData = await api.request('/subcontractors?is_active=true')
       setSubs(subsData)
 
-      // 材料类别 - 可以从 API 获取或硬编码
-      setCategories([
-        { id: 'werkzeuge', name: 'Werkzeuge' },
-        { id: 'baumaterialien', name: 'Baumaterialien' },
-        { id: 'elektro', name: 'Elektro' },
-        { id: 'sanitaer', name: 'Sanitär' },
-        { id: 'other', name: 'Sonstige' }
-      ])
+      // 从 API 加载材料类别
+      const categoriesData = await api.request('/items/categories/?type=material')
+      setCategories(categoriesData)
     } catch (error) {
       console.error('Error loading filter options:', error)
     }
