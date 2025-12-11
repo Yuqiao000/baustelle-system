@@ -91,6 +91,7 @@ class Category(CategoryBase):
 # ============================================
 class ItemBase(BaseModel):
     category_id: Optional[str] = None
+    baustelle_id: Optional[str] = None
     name: str
     type: Literal["material", "maschine"]
     unit: str
@@ -110,6 +111,7 @@ class ItemCreate(ItemBase):
 
 class ItemUpdate(BaseModel):
     category_id: Optional[str] = None
+    baustelle_id: Optional[str] = None
     name: Optional[str] = None
     unit: Optional[str] = None
     description: Optional[str] = None

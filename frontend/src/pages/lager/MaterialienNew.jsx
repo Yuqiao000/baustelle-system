@@ -309,23 +309,12 @@ export default function MaterialienNew() {
   // Filter grouped materials based on filters
   const filterGroups = (groups) => {
     return groups.filter(group => {
-      // Projekt filter - map projekt name to category name
+      // Projekt filter - use direct baustelle_id relationship
       if (filters.projekt) {
-        const selectedBaustelle = baustellen.find(b => b.id === filters.projekt)
-        if (selectedBaustelle) {
-          // Find matching category by name
-          const matchingCategory = categories.find(c => c.name === selectedBaustelle.name)
-          if (matchingCategory) {
-            // Check if any item in the group belongs to this category
-            const belongsToCategory = group.items.some(item => item.category_id === matchingCategory.id)
-            if (!belongsToCategory) {
-              return false
-            }
-          } else {
-            // If no matching category found for this projekt, hide all materials
-            // (materials are only shown if they belong to a category with the same name as the projekt)
-            return false
-          }
+        // Check if any item in the group belongs to this projekt/baustelle
+        const belongsToProjekt = group.items.some(item => item.baustelle_id === filters.projekt)
+        if (!belongsToProjekt) {
+          return false
         }
       }
 

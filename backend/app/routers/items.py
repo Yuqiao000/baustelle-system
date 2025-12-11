@@ -5,6 +5,7 @@ from app.models import Item, ItemCreate, ItemUpdate, Category
 from typing import List, Optional
 
 router = APIRouter(prefix="/items", tags=["Items"])
+# Updated to include baustelle_id in Item model
 
 
 @router.get("/", response_model=List[Item])
