@@ -67,7 +67,7 @@ export const useAuthStore = create((set, get) => ({
     }
   },
 
-  signUp: async (email, password, fullName, role = 'worker') => {
+  signUp: async (email, password, fullName, role = 'worker', company = '') => {
     try {
       const { data, error } = await supabase.auth.signUp({
         email,
@@ -76,6 +76,7 @@ export const useAuthStore = create((set, get) => ({
           data: {
             full_name: fullName,
             role,
+            company,
           },
         },
       })
@@ -90,6 +91,7 @@ export const useAuthStore = create((set, get) => ({
           email,
           full_name: fullName,
           role,
+          company,
         })
 
       if (profileError) throw profileError

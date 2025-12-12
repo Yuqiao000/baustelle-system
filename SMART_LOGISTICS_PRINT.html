@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart-Logistics - Zugangsanleitung</title>
+    <style>
+        @page {
+            size: A4;
+            margin: 2cm;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: white;
+        }
+
+        .container {
+            max-width: 210mm;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 3px solid #2563eb;
+        }
+
+        .logo {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 15px;
+            background: linear-gradient(135deg, #2563eb, #1e40af);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 40px;
+            font-weight: bold;
+        }
+
+        h1 {
+            color: #2563eb;
+            font-size: 32px;
+            margin-bottom: 5px;
+        }
+
+        .subtitle {
+            color: #666;
+            font-size: 16px;
+            font-style: italic;
+        }
+
+        .qr-section {
+            text-align: center;
+            margin: 30px 0;
+            padding: 20px;
+            background: #f8fafc;
+            border-radius: 10px;
+            border: 2px solid #2563eb;
+        }
+
+        .qr-code {
+            width: 200px;
+            height: 200px;
+            margin: 0 auto;
+            background: white;
+            padding: 10px;
+            border-radius: 8px;
+        }
+
+        .url {
+            font-size: 24px;
+            font-weight: bold;
+            color: #2563eb;
+            margin-top: 15px;
+        }
+
+        .section {
+            margin: 25px 0;
+            page-break-inside: avoid;
+        }
+
+        h2 {
+            color: #2563eb;
+            font-size: 20px;
+            margin-bottom: 15px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #e5e7eb;
+        }
+
+        h3 {
+            color: #1e40af;
+            font-size: 16px;
+            margin: 15px 0 10px;
+        }
+
+        .step {
+            margin-left: 20px;
+            margin-bottom: 8px;
+        }
+
+        .account-box {
+            background: #f1f5f9;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 8px;
+            border-left: 4px solid #2563eb;
+        }
+
+        .account-box strong {
+            color: #1e40af;
+            display: block;
+            margin-bottom: 5px;
+            font-size: 14px;
+        }
+
+        .credentials {
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            color: #333;
+        }
+
+        .warning-box {
+            background: #fef3c7;
+            border-left: 4px solid #f59e0b;
+            padding: 12px;
+            margin: 15px 0;
+            border-radius: 5px;
+        }
+
+        .info-box {
+            background: #dbeafe;
+            border-left: 4px solid #2563eb;
+            padding: 12px;
+            margin: 15px 0;
+            border-radius: 5px;
+        }
+
+        .company-structure {
+            background: #f8fafc;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+        }
+
+        ul {
+            margin-left: 25px;
+        }
+
+        li {
+            margin: 5px 0;
+        }
+
+        .footer {
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 2px solid #e5e7eb;
+            text-align: center;
+            font-size: 12px;
+            color: #666;
+        }
+
+        @media print {
+            body {
+                print-color-adjust: exact;
+                -webkit-print-color-adjust: exact;
+            }
+
+            .section {
+                page-break-inside: avoid;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <div class="logo">📦</div>
+            <h1>Smart-Logistics</h1>
+            <p class="subtitle">Intelligentes Materialverwaltungssystem</p>
+        </div>
+
+        <!-- QR Code Section -->
+        <div class="qr-section">
+            <h2 style="border: none; color: #1e40af;">🚀 Schnellzugang</h2>
+            <p>Scannen Sie diesen QR-Code mit Ihrer Smartphone-Kamera:</p>
+            <div class="qr-code">
+                <img src="sl_logistics_qr_code.png" alt="QR Code" style="width: 100%; height: 100%;">
+            </div>
+            <p class="url">https://sl-logistics.com</p>
+        </div>
+
+        <!-- Installation Instructions -->
+        <div class="section">
+            <h2>📱 App zum Startbildschirm hinzufügen</h2>
+
+            <h3>Für iPhone (Safari):</h3>
+            <ol>
+                <li class="step">Öffnen Sie <strong>https://sl-logistics.com</strong> in Safari</li>
+                <li class="step">Tippen Sie auf das <strong>Teilen-Symbol</strong> (Quadrat mit Pfeil ↑)</li>
+                <li class="step">Scrollen Sie nach unten und wählen Sie <strong>"Zum Home-Bildschirm"</strong></li>
+                <li class="step">Tippen Sie auf <strong>"Hinzufügen"</strong></li>
+                <li class="step">✅ Fertig! Das Symbol erscheint auf Ihrem Startbildschirm</li>
+            </ol>
+
+            <h3>Für Android (Chrome):</h3>
+            <ol>
+                <li class="step">Öffnen Sie <strong>https://sl-logistics.com</strong> in Chrome</li>
+                <li class="step">Tippen Sie auf die <strong>drei Punkte (⋮)</strong> oben rechts</li>
+                <li class="step">Wählen Sie <strong>"Zum Startbildschirm hinzufügen"</strong></li>
+                <li class="step">Tippen Sie auf <strong>"Hinzufügen"</strong></li>
+                <li class="step">✅ Fertig! Das Symbol erscheint auf Ihrem Startbildschirm</li>
+            </ol>
+        </div>
+
+        <!-- Demo Accounts -->
+        <div class="section">
+            <h2>👥 Demo-Zugänge zum Testen</h2>
+
+            <h3>🔨 Arbeiter-Accounts (Worker):</h3>
+
+            <div class="account-box">
+                <strong>MAFC GmbH - Arbeiter 1</strong>
+                <div class="credentials">
+                    E-Mail: worker.mafc1@demo.de<br>
+                    Passwort: demo123<br>
+                    Firma: MAFC
+                </div>
+            </div>
+
+            <div class="account-box">
+                <strong>MAFC GmbH - Arbeiter 2</strong>
+                <div class="credentials">
+                    E-Mail: worker.mafc2@demo.de<br>
+                    Passwort: demo123<br>
+                    Firma: MAFC
+                </div>
+            </div>
+
+            <div class="account-box">
+                <strong>BBR GmbH - Arbeiter 1</strong>
+                <div class="credentials">
+                    E-Mail: worker.bbr1@demo.de<br>
+                    Passwort: demo123<br>
+                    Firma: BBR
+                </div>
+            </div>
+
+            <div class="account-box">
+                <strong>BBR GmbH - Arbeiter 2</strong>
+                <div class="credentials">
+                    E-Mail: worker.bbr2@demo.de<br>
+                    Passwort: demo123<br>
+                    Firma: BBR
+                </div>
+            </div>
+
+            <h3>📦 Lager-Account (Warehouse):</h3>
+
+            <div class="account-box">
+                <strong>STG - Hauptlager</strong>
+                <div class="credentials">
+                    E-Mail: lager@demo.de<br>
+                    Passwort: demo123<br>
+                    Firma: STG (Hauptgesellschaft)
+                </div>
+            </div>
+        </div>
+
+        <!-- Company Structure -->
+        <div class="section">
+            <h2>🏢 Unternehmensstruktur</h2>
+            <div class="company-structure">
+                <p><strong>STG</strong> - Hauptgesellschaft (Lager-Zentrale)</p>
+                <ul>
+                    <li>MAFC GmbH (Tochtergesellschaft)</li>
+                    <li>BBR GmbH (Tochtergesellschaft)</li>
+                    <li>Weitere Tochtergesellschaften...</li>
+                </ul>
+            </div>
+
+            <div class="info-box">
+                <strong>📝 Bei der Registrierung:</strong><br>
+                Bitte geben Sie Ihren Firmennamen an (z.B. STG, MAFC, BBR).<br>
+                <strong>STG</strong> ist die Hauptgesellschaft (für Lager-Personal).<br>
+                <strong>MAFC/BBR</strong> sind Tochtergesellschaften (für Arbeiter).
+            </div>
+        </div>
+
+        <!-- Features -->
+        <div class="section">
+            <h2>✨ Hauptfunktionen</h2>
+
+            <h3>Für Arbeiter:</h3>
+            <ul>
+                <li>Materialanfragen erstellen</li>
+                <li>Eigene Anfragen verfolgen</li>
+                <li>Benachrichtigungen erhalten</li>
+                <li>QR-Code scannen für Materialzugriff</li>
+            </ul>
+
+            <h3>Für Lager-Personal:</h3>
+            <ul>
+                <li>Materialbestand verwalten</li>
+                <li>Anfragen bearbeiten (genehmigen/ablehnen)</li>
+                <li>Inventar in Echtzeit aktualisieren</li>
+                <li>Übersicht über alle Firmen-Anfragen</li>
+            </ul>
+        </div>
+
+        <!-- Benefits -->
+        <div class="section">
+            <h2>💡 Vorteile der App-Installation</h2>
+            <ul>
+                <li>✅ <strong>Offline-Zugriff</strong> auf wichtige Funktionen</li>
+                <li>✅ <strong>Push-Benachrichtigungen</strong> für neue Anfragen</li>
+                <li>✅ <strong>Schneller Zugriff</strong> direkt vom Startbildschirm</li>
+                <li>✅ <strong>Keine App-Store-Installation nötig</strong> (Progressive Web App)</li>
+                <li>✅ <strong>Automatische Updates</strong> beim Öffnen der App</li>
+            </ul>
+        </div>
+
+        <!-- Footer -->
+        <div class="footer">
+            <p><strong>Smart-Logistics</strong> - Effiziente Materialverwaltung für moderne Unternehmen</p>
+            <p style="margin-top: 10px;">Version 1.0 - © 2024 Smart-Logistics</p>
+            <p style="margin-top: 5px;">Bei Fragen wenden Sie sich bitte an Ihren IT-Administrator</p>
+        </div>
+    </div>
+</body>
+</html>

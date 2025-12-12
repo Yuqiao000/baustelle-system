@@ -8,6 +8,7 @@ export default function LoginPage() {
   const [password, setPassword] = useState('')
   const [fullName, setFullName] = useState('')
   const [role, setRole] = useState('worker')
+  const [company, setCompany] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
 
@@ -23,7 +24,7 @@ export default function LoginPage() {
       if (isLogin) {
         result = await signIn(email, password)
       } else {
-        result = await signUp(email, password, fullName, role)
+        result = await signUp(email, password, fullName, role, company)
       }
 
       if (!result.success) {
@@ -122,18 +123,35 @@ export default function LoginPage() {
             </div>
 
             {!isLogin && (
-              <div>
-                <label className="label">Rolle</label>
-                <select
-                  value={role}
-                  onChange={(e) => setRole(e.target.value)}
-                  className="input"
-                >
-                  <option value="worker">Arbeiter</option>
-                  <option value="lager">Lager</option>
-                  <option value="admin">Administrator</option>
-                </select>
-              </div>
+              <>
+                <div>
+                  <label className="label">Firma</label>
+                  <input
+                    type="text"
+                    value={company}
+                    onChange={(e) => setCompany(e.target.value)}
+                    className="input"
+                    required
+                    placeholder="z.B. STG, MAFC, BBR"
+                  />
+                  <p className="text-xs text-gray-500 mt-1">
+                    STG = Hauptgesellschaft, MAFC/BBR = Tochtergesellschaft
+                  </p>
+                </div>
+
+                <div>
+                  <label className="label">Rolle</label>
+                  <select
+                    value={role}
+                    onChange={(e) => setRole(e.target.value)}
+                    className="input"
+                  >
+                    <option value="worker">Arbeiter</option>
+                    <option value="lager">Lager</option>
+                    <option value="admin">Administrator</option>
+                  </select>
+                </div>
+              </>
             )}
 
             <button
