@@ -44,8 +44,8 @@ export default function LoginPage() {
           <div className="inline-flex items-center justify-center w-16 h-16 bg-white rounded-full mb-4">
             <Package className="h-10 w-10 text-primary-600" />
           </div>
-          <h1 className="text-3xl font-bold text-white mb-2">Baustelle System</h1>
-          <p className="text-primary-100">Materialverwaltung für Baustellen</p>
+          <h1 className="text-3xl font-bold text-white mb-2">Smart-Logistics</h1>
+          <p className="text-primary-100">Intelligent Material Management System</p>
         </div>
 
         {/* Form Card */}
